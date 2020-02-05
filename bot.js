@@ -6,6 +6,7 @@ const TelegramBot = require("node-telegram-bot-api")
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
+const LANG = process.env.LANGUAGE
 const bot = new TelegramBot(TOKEN, { polling: true })
 
 const warningMessage = "You've been muted for 45 seconds for using a language other than English."
@@ -41,7 +42,7 @@ bot.on("message", async msg => {
     return
   }
 
-  if (lang === "en") {
+  if (lang === LANG) {
     return
   } else {
     if (shouldPunish(msg)) {
