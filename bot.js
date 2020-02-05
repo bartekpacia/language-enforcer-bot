@@ -8,13 +8,9 @@ const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
 const bot = new TelegramBot(TOKEN, { polling: true })
 
-console.log(`GCP_KEY: ${GCP_KEY}`)
-
 const warningMessage = "You've been muted for 45 seconds for using a language other than English."
 
 console.log("Bot is running...")
-
-bot.once()
 
 bot.on("message", async msg => {
   let options = {
@@ -46,15 +42,43 @@ bot.on("message", async msg => {
   if (lang === "en") {
     return
   } else {
-    await muteThatBastard(msg)
+    if (shouldPunish(msg)) {
+      await punish(msg)
+    }
   }
 })
 
 /**
- * Mutes that poor bastard.
+ * Determines whether the user should be punished for the message.
+ * @param {TelegramBot.Message} msg Telegram Message object
+ * @returns {boolean} true if user should be punished, false otherwise
+ */
+function shouldPunish(msg) {
+  // Don't punish for short messages
+  if (msg.text.length <= 4) {
+    return false
+  }
+
+  // Don't punish if user's name occurs in the message
+  if (msg.text.includes(msg.chat.first_name) || msg.text.includes(msg.chat.last_name)) {
+    return false
+  }
+
+  if (msg.text.includes("XD")) {
+    return false
+  }
+
+  if (msg.text.includes("/stat")) {
+    return false
+  }
+  return true
+}
+
+/**
+ * Punishes the user for sending the inappropriate messages.
  * @param {TelegramBot.Message} msg Telegram Message object
  */
-async function muteThatBastard(msg) {
+async function punish(msg) {
   await bot.sendMessage(msg.chat.id, warningMessage, {
     reply_to_message_id: msg.message_id
   })
