@@ -6,5 +6,7 @@ problems:
 
 - ~~detects sender name's~~
 - ~~detects "XD"~~
+- ~~ detects commands~~
 - crashes work on pools
 - crashes work on images
+- probably doesn't unmute
