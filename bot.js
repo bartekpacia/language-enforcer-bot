@@ -68,7 +68,8 @@ function shouldPunish(msg) {
     return false
   }
 
-  if (msg.text.includes("/stat")) {
+  // Disable for commands
+  if (msg.text.startsWith("/")) {
     return false
   }
   return true
