@@ -77,3 +77,6 @@ typings/
 
 # Environment variables
 .env
+
+# Service account file
+telegram-lang-enforcer-firebase-key.json
