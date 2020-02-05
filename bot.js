@@ -46,24 +46,31 @@ bot.on("message", async msg => {
   if (lang === "en") {
     return
   } else {
-    await muteThatBastard(msg)
-  }
+      options.uri = `https://translation.googleapis.com/language/translate/v2/translate?key=${GCP_KEY}`
+      options.body.target = 'en'
+      try {
+        response = await request(options)
+      } catch (err) {
+          console.log(err.message)
+          await bot.sendMessage(msg.chat.id, "Ouch, I just crashed! Sb please fix me :/")
+          return
+        }
+
+      const translated = response.data.translations[0].translatedText
+      await helpTheCommunity()
+
+    } 
 })
 
 /**
- * Mutes that poor bastard.
+ * Translates the Messages for those who don't know English.
  * @param {TelegramBot.Message} msg Telegram Message object
+ * @param {String} resp Response from Google Translate API
  */
-async function muteThatBastard(msg) {
-  await bot.sendMessage(msg.chat.id, warningMessage, {
+async function helpTheCommunity(msg, resp) {
+  await bot.sendMessage(msg.chat.id, `I translated the message from ${msg.from.username}! It says: ${resp}`, {
     reply_to_message_id: msg.message_id
   })
 
-  await bot.restrictChatMember(msg.chat.id, msg.from.id, {
-    can_send_messages: false
-  })
-
-  setTimeout(async () => {
-    await bot.restrictChatMember(msg.chat.id, msg.from.id, true)
-  }, 45000)
 }
+
