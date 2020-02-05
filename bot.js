@@ -31,13 +31,15 @@ bot.on("message", async msg => {
     return
   }
 
+  const lang = response.data.detections[0][0].language
+  console.log(lang)
+
+  // console.log(JSON.stringify(response)) Uncomment to log API whole response
+
   if (msg.chat.type === "private") {
     await bot.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
     return
   }
-
-  const lang = response.data.detections[0][0].language
-  console.log(lang)
 
   if (lang === "en") {
     return
