@@ -4,7 +4,10 @@ You are very likely to end up with most of the people in your group blocked :)
 
 # LangPolizei (Lanugage Police)
 
-Telegram bot to enforce one language in the _group_ chat.
+Telegram bot to enforce one language in the _group_ chat. How does it do it?
+
+If LangPolizei detects that the language doesn't match the one specified in `.env` file,
+it mutes the user for 45 seconds.
 
 ## Worth mentioning:
 
