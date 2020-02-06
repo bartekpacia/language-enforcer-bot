@@ -9,11 +9,23 @@ const GCP_KEY = process.env.GCP_API_KEY
 const LANG = process.env.LANGUAGE
 const bot = new TelegramBot(TOKEN, { polling: true })
 
-const warningMessage = "You've been muted for 45 seconds for using a language other than English."
+const rebukeMessage = `Incorrect language detected. Please use only: ${LANG}`
+const warningMessage = `You've been muted for 45 seconds for using a language other than: ${LANG}`
 
 console.log("Bot is running...")
 
-bot.on("message", async msg => {
+bot.bot.on("message", async msg => {
+  if (msg.text === undefined) {
+    console.log("Message doesn't contain text, returned.")
+    return
+  }
+
+  if (msg.chat.type === "private") {
+    console.log("Message was sent in a private chat, returned.")
+    await bot.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
+    return
+  }
+
   let options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_KEY}`,
     method: "POST",
@@ -37,28 +49,18 @@ bot.on("message", async msg => {
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
-  if (msg.chat.type === "private") {
-    console.log("Message was sent in a private chat, returned.")
-    await bot.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
-    return
-  }
-
-  if (msg.text === undefined) {
-    console.log("Message doesn't contain text, returned.")
-    return
-  }
-
   if (lang === LANG) {
     return
   } else {
     if (shouldPunish(msg)) {
-      await punish(msg)
+      await rebuke(msg)
+      // await mute(msg)
     }
   }
 })
 
 /**
- * Determines whether the user should be punished for the message.
+ * Determines whether the user message doesn't match the specified language.
  * @param {TelegramBot.Message} msg Telegram Message object
  * @returns {boolean} true if user should be punished, false otherwise
  */
@@ -85,10 +87,21 @@ function shouldPunish(msg) {
 }
 
 /**
- * Punishes the user for sending the inappropriate messages.
+ * Politely reminds the user to use only the specified language
  * @param {TelegramBot.Message} msg Telegram Message object
  */
-async function punish(msg) {
+async function rebuke(msg) {
+  await bot.sendMessage(msg.chat.id, rebukeMessage, {
+    reply_to_message_id: msg.message_id
+  })
+}
+
+/**
+ * Temporarily mutes the user for sending the inappropriate messages.
+ * TODO: Make the unmute work X D
+ * @param {TelegramBot.Message} msg Telegram Message object
+ */
+async function mute(msg) {
   await bot.sendMessage(msg.chat.id, warningMessage, {
     reply_to_message_id: msg.message_id
   })
