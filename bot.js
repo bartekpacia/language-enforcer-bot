@@ -55,12 +55,15 @@ bot.on("message", async msg => {
     return
   }
 
-  const lang = response.data.detections[0][0].language
-  console.log(`Lang: ${lang}, message: ${msg.text}`)
+  const detectedLang = response.data.detections[0][0].language
+  const confidence = response.data.detections[0][0].confidence
+  console.log(
+    `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${msg.text}`
+  )
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
-  if (lang === LANG) {
+  if (detectedLang === LANG) {
     return
   } else {
     if (shouldPunish(msg)) {
