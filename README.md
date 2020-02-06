@@ -47,5 +47,5 @@ it mutes the user for 45 seconds.
 
 - ban only if `confidence` is big enough. If it isn't, don't mute, just send a message
   like "What you sent doesn't seem to be in English..."
-- make the bot truly heplful (suggested by @MatejMacka). Make it translate the messages
+- make the bot truly heplful (suggested by @MatejMecka). Make it translate the messages
   instead of banning people
