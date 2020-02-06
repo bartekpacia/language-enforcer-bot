@@ -14,7 +14,18 @@ const warningMessage = `You've been muted for 45 seconds for using a language ot
 
 console.log("Bot is running...")
 
-bot.bot.on("message", async msg => {
+bot.addListener("group_chat_created", async (msg, meta) => {
+  await bot.sendMessage(
+    msg.chat.id,
+    "Hi all! Let's begin the rule of law and order! \n(triggered by event: group_chat_created)"
+  )
+})
+
+bot.addListener("new_chat_members", async (msg, meta) => {
+  await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members)")
+})
+
+bot.on("message", async msg => {
   if (msg.text === undefined) {
     console.log("Message doesn't contain text, returned.")
     return
