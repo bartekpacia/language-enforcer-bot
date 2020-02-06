@@ -33,12 +33,18 @@ bot.on("message", async msg => {
   }
 
   const lang = response.data.detections[0][0].language
-  console.log(lang)
+  console.log(`Lang: ${lang}, message: ${msg.text}`)
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
   if (msg.chat.type === "private") {
+    console.log("Message was sent in a private chat, returned.")
     await bot.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
+    return
+  }
+
+  if (msg.text === undefined) {
+    console.log("Message doesn't contain text, returned.")
     return
   }
 
