@@ -57,8 +57,11 @@ bot.on("message", async msg => {
 
   const detectedLang = response.data.detections[0][0].language
   const confidence = response.data.detections[0][0].confidence
+  const isReliable = response.data.detections[0][0].isReliable
   console.log(
-    `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${msg.text}`
+    `Lang: ${detectedLang}, isReliable: ${isReliable}, confidence: ${confidence.toPrecision(
+      3
+    )}, message: ${msg.text}`
   )
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
@@ -97,6 +100,12 @@ function shouldPunish(msg) {
   if (msg.text.startsWith("/")) {
     return false
   }
+
+  // Allow uncontrolled laughter
+  if (msg.text.startsWith("hah") || msg.text.startsWith("hha")) {
+    return false
+  }
+
   return true
 }
 
