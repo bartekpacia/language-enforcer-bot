@@ -46,6 +46,10 @@ it mutes the user for 45 seconds.
 ## Ideas:
 
 - ban only if `confidence` is big enough. If it isn't, don't mute, just send a message
-  like "What you sent doesn't seem to be in English..."
+  like "What you sent doesn't seem to be in English..." (**after evaluation: not a good solution,
+  confidence is often wrong**)
 - make the bot truly heplful (suggested by @MatejMecka). Make it translate the messages
   instead of banning people
+- When a bot raises a false positive, the priviliged ones (e.g admins) can execute a command like "/LangPolizeiBot dont_warn <word>" and the message is saved to the DB. In the future, no warnings are raised for this particular message.
+  - I think Cloud Firestore would be good because of ease of integration.
+  - After a few days of activity we'd have a nice database of exceptions.
