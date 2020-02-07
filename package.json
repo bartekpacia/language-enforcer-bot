@@ -1,5 +1,9 @@
 {
   "name": "telegram-lang-enforcer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bartekpacia/telegram-lang-enforcer"
+  },
   "version": "1.0.0",
   "description": "Simple Telegram bot enforcing English language in groups.",
   "author": "Bartek Pacia",
