@@ -102,6 +102,7 @@
 
     // Prefer using arrow functions for callbacks
     "prefer-arrow-callback": "warn",
+    "prefer-const": "warn",
 
     "import/no-commonjs": "off"
   }

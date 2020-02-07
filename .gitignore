@@ -80,3 +80,4 @@ typings/
 
 # Service account file
 telegram-lang-enforcer-firebase-key.json
+serviceAccountKey.json

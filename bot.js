@@ -1,9 +1,15 @@
 // Load .env file that has TOKEN
 require("dotenv").config()
-
+const admin = require("firebase-admin")
 const request = require("request-promise-native")
 const similarity = require("string-similarity")
 const TelegramBot = require("node-telegram-bot-api")
+
+const serviceAccount = require("./serviceAccountKey.json")
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+})
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
@@ -39,7 +45,7 @@ bot.on("message", async msg => {
     return
   }
 
-  let options = {
+  const options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_KEY}`,
     method: "POST",
     json: true,
@@ -67,6 +73,14 @@ bot.on("message", async msg => {
   )
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
+
+  await admin
+    .firestore()
+    .collection("messages")
+    .doc()
+    .create({
+      message: msg.text
+    })
 
   if (detectedLang === LANG) {
     return
