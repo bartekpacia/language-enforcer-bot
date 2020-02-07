@@ -98,6 +98,7 @@ bot.on("message", async msg => {
  * @returns {boolean} true if user should be punished, false otherwise
  */
 function shouldPunish(msg) {
+  var testMessage = msg.text;
   // Don't punish for short messages
   if (msg.text.length <= 4) {
     return false
@@ -108,7 +109,11 @@ function shouldPunish(msg) {
     return false
   }
 
-  if (msg.text.includes("XD")) {
+  // Add an exception for messages that contain XD letters only
+  var xdTest = testMessage.toLowerCase();
+  xdTest = xdTest.replace(/x/g, "");
+  xdTest = xdTest.replace(/d/g, "");
+  if (xdTest == "") {
     return false
   }
 
@@ -118,7 +123,10 @@ function shouldPunish(msg) {
   }
 
   // Allow uncontrolled laughter
-  if (msg.text.startsWith("hah") || msg.text.startsWith("hha")) {
+  var hahaTest = testMessage.toLowerCase();
+  hahaTest = hahaTest.replace(/h/g, "");
+  hahaTest = hahaTest.replace(/a/g, "");
+  if (hahaTest == "") {
     return false
   }
 
