@@ -16,7 +16,8 @@
     "dotenv": "^6.2.0",
     "node-telegram-bot-api": "^0.30.0",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7"
+    "request-promise-native": "^1.0.7",
+    "string-similarity": "^4.0.1"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
