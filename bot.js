@@ -17,6 +17,11 @@ const LANG = process.env.LANGUAGE
 
 const bot = new TelegramBot(TOKEN, { polling: true })
 
+const fsStats = firestore.collection('stats').doc('Stats')
+let setInitial = fsStats.set({
+  total: 0
+})
+
 const rebukeMessage = `Incorrect language detected. Please use only: ${LANG}`
 const warningMessage = `You've been muted for 45 seconds for using a language other than: ${LANG}`
 
@@ -86,11 +91,22 @@ bot.on("message", async msg => {
     return
   } else {
     if (shouldPunish(msg)) {
+      await incrementTotal(fsStats)
       await rebuke(msg)
       // await mute(msg)
     }
   }
 })
+
+/**
+ * Increments the total number of detected messages by 1
+ * @param (Firestore.DocumentReference) doc
+ */
+async function incrementTotal(doc) {
+  let popIncrement = doc.update({
+    total: admin.firestore.FieldValue.increment(1))
+  })
+}
 
 /**
  * Determines whether the user message doesn't match the specified language.
