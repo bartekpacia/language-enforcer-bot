@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "dotenv": "^6.2.0",
+    "firebase-admin": "^8.9.2",
     "node-telegram-bot-api": "^0.30.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",

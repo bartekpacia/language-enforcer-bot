@@ -2,11 +2,13 @@
 require("dotenv").config()
 
 const request = require("request-promise-native")
+const similarity = require("string-similarity")
 const TelegramBot = require("node-telegram-bot-api")
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
 const LANG = process.env.LANGUAGE
+
 const bot = new TelegramBot(TOKEN, { polling: true })
 
 const rebukeMessage = `Incorrect language detected. Please use only: ${LANG}`
