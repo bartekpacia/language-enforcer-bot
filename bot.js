@@ -50,6 +50,20 @@ bot.on("message", async msg => {
     return
   }
 
+  if(msg.text.toLowerCase().indexOf("/stats") === 0) {
+    let getDoc = fsStats.get().then(doc => {
+      if (!doc.exists) {
+        console.log("/stats command: No document found")
+        await bot.sendMessage(msg.chat.id, "Expected database not found :/")
+      } else {
+        console.log("/stats command: Sending received data from document")
+        let statData = doc.data()
+        await bot.sendMessage(msg.chat.id, "Current stats for punishable messages sent: ${statData}")
+      }
+    })
+    return
+  }
+
   const options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_KEY}`,
     method: "POST",
