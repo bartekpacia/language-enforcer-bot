@@ -100,7 +100,9 @@ bot.on("message", async msg => {
   if (detectedLang === LANG) {
     return
   } else {
-    if (shouldPunish(msg)) {
+    const shouldPunish = await shouldPunish(msg)
+
+    if (shouldPunish) {
       await rebuke(msg)
       // await mute(msg)
     }
@@ -110,9 +112,9 @@ bot.on("message", async msg => {
 /**
  * Determines whether the user message doesn't match the specified language.
  * @param {TelegramBot.Message} msg Telegram Message object
- * @returns {boolean} true if user should be punished, false otherwise
+ * @returns {Promise<boolean>} true if user should be punished, false otherwise
  */
-function shouldPunish(msg) {
+async function shouldPunish(msg) {
   const testMessage = msg.text
   // Don't punish for short messages
   if (msg.text.length <= 4) {
@@ -124,16 +126,16 @@ function shouldPunish(msg) {
     return false
   }
 
+  // Disable for commands and mentions
+  if (msg.text.startsWith("/") || msg.text.startsWith("@")) {
+    return false
+  }
+
   // Add an exception for messages that contain XD letters only
   let xdTest = testMessage.toLowerCase()
   xdTest = xdTest.replace(/x/g, "")
   xdTest = xdTest.replace(/d/g, "")
   if (xdTest === "") {
-    return false
-  }
-
-  // Disable for commands and mentions
-  if (msg.text.startsWith("/") || msg.text.startsWith("@")) {
     return false
   }
 
@@ -144,6 +146,18 @@ function shouldPunish(msg) {
   if (hahaTest === "") {
     return false
   }
+
+  const exceptionsSnapshot = await admin
+    .firestore()
+    .collection("exceptions")
+    .get()
+
+  exceptionsSnapshot.forEach(docSnapshot => {
+    const text = docSnapshot.get("text")
+    if (similarity.compareTwoStrings(text, msg.text) >= 0.85) {
+      return true
+    }
+  })
 
   return true
 }
