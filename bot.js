@@ -30,9 +30,10 @@ bot.addListener("group_chat_created", async (msg, meta) => {
 })
 
 bot.addListener("new_chat_members", async (msg, meta) => {
-  await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members)")
+  await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members).")
 })
 
+// Handles adding messages to the
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from.id
@@ -42,27 +43,58 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
   if (chatMember.status === "administrator" || chatMember.status === "creator") {
     // okay
   } else {
-    console.log("User is not an admin. Returning")
+    console.log("User is not an admin. Returned.")
+    await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
     return
   }
 
   // "match" is the result of executing the regexp above on the message's text
-  const textToBeIgnored = match[1].toLowerCase()
+  const inputText = match[1].toLowerCase()
 
-  admin
+  await admin
     .firestore()
     .collection("exceptions")
     .add({
-      text: textToBeIgnored
+      text: inputText
     })
 
   // send back the matched "whatever" to the chat
-  await bot.sendMessage(
-    chatId,
-    `Okay, "${textToBeIgnored}" has been added to the exception list :) `
-  )
+  await bot.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
 })
 
+// Handles removing messages from the database
+bot.onText(/\/remove (.+)/, async (msg, match) => {
+  const chatId = msg.chat.id
+  const userId = msg.from.id
+
+  const chatMember = await bot.getChatMember(chatId, userId)
+
+  if (chatMember.status === "administrator" || chatMember.status === "creator") {
+    // okay
+  } else {
+    console.log("User is not an admin. Returned.")
+    await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+    return
+  }
+
+  // "match" is the result of executing the regexp above on the message's text
+  const inputText = match[1].toLowerCase()
+
+  const exceptionsSnapshot = await admin
+    .firestore()
+    .collection("exceptions")
+    .where("text", "==", inputText)
+    .get()
+
+  for (const doc of exceptionsSnapshot.docs) {
+    doc.ref.delete() // bear in mind we are not waiting here for a Promise to be resolved
+  }
+
+  // send back the matched "whatever" to the chat
+  await bot.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
+})
+
+// Handles all messages and checks whether they're in the specified language
 bot.on("message", async msg => {
   if (msg.text === undefined) {
     console.log("Message doesn't contain text, returned.")
@@ -89,7 +121,7 @@ bot.on("message", async msg => {
     response = await request(options)
   } catch (err) {
     console.log(err.message)
-    await bot.sendMessage(msg.chat.id, "Ouch, I just crashed! Sb please fix me :/")
+    await bot.sendMessage(msg.chat.id, "Ouch, I just crashed! Somebody please fix me :/")
     return
   }
 
@@ -117,12 +149,12 @@ bot.on("message", async msg => {
 })
 
 /**
- * Determines whether the user message doesn't match the specified language.
+ * Determines whether the user should be punished for his message.
  * @param {TelegramBot.Message} msg Telegram Message object
  * @returns {Promise<boolean>} true if user should be punished, false otherwise
  */
 async function shouldPunish(msg) {
-  const testMessage = msg.text
+  const inputText = msg.text.toLowerCase()
   // Don't punish for short messages
   if (msg.text.length <= 4) {
     return false
@@ -139,7 +171,7 @@ async function shouldPunish(msg) {
   }
 
   // Add an exception for messages that contain XD letters only
-  let xdTest = testMessage.toLowerCase()
+  let xdTest = inputText
   xdTest = xdTest.replace(/x/g, "")
   xdTest = xdTest.replace(/d/g, "")
   if (xdTest === "") {
@@ -147,10 +179,15 @@ async function shouldPunish(msg) {
   }
 
   // Allow uncontrolled laughter
-  let hahaTest = testMessage.toLowerCase()
+  let hahaTest = inputText
   hahaTest = hahaTest.replace(/h/g, "")
   hahaTest = hahaTest.replace(/a/g, "")
   if (hahaTest === "") {
+    return false
+  }
+
+  // Allow messages with links
+  if (inputText.includes("https://")) {
     return false
   }
 
@@ -161,7 +198,10 @@ async function shouldPunish(msg) {
 
   for (const doc of exceptionsSnapshot.docs) {
     const text = doc.get("text")
-    if (similarity.compareTwoStrings(text, msg.text.toLowerCase()) >= 0.85) {
+    const similarityLevel = similarity.compareTwoStrings(text, inputText)
+    console.log(`Similarity ${similarityLevel} between strings: "${text}" and "${inputText}" `)
+
+    if (similarityLevel >= 0.8) {
       return false
     }
   }
