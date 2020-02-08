@@ -13,97 +13,37 @@
     "prettier/prettier": "warn",
     "no-console": "off",
     "no-var": "warn",
-    // Removed rule "disallow the use of debugger" from recommended eslint rules
     "no-debugger": "off",
-
-    // Removed rule "disallow unused variables" from recommended eslint rules
     "no-unused-vars": "off",
-
-    // Removed rule "disallow the use of undeclared variables unless mentioned in /*global */ comments" from recommended eslint rules
     "no-undef": "error",
-
-    // Warn if return statements do not either always or never specify values
     "consistent-return": "warn",
-
-    // Warn if no return statements in callbacks of array methods
     "array-callback-return": "warn",
-
-    // Require the use of === and !==
     "eqeqeq": "error",
-
-    // Disallow the use of alert, confirm, and prompt
     "no-alert": "error",
-
-    // Disallow the use of arguments.caller or arguments.callee
     "no-caller": "error",
-
-    // Disallow null comparisons without type-checking operators
     "no-eq-null": "error",
-
-    // Disallow the use of eval()
     "no-eval": "error",
-
-    // Warn against extending native types
     "no-extend-native": "warn",
-
-    // Warn against unnecessary calls to .bind()
     "no-extra-bind": "warn",
-
-    // Warn against unnecessary labels
     "no-extra-label": "warn",
-
-    // Disallow leading or trailing decimal points in numeric literals
     "no-floating-decimal": "error",
-
-    // Warn against shorthand type conversions
     "no-implicit-coercion": "warn",
-
-    // Warn against function declarations and expressions inside loop statements
     "no-loop-func": "warn",
-
-    // Disallow new operators with the Function object
     "no-new-func": "error",
-
-    // Warn against new operators with the String, Number, and Boolean objects
     "no-new-wrappers": "warn",
-
-    // Disallow throwing literals as exceptions
     "no-throw-literal": "error",
-
-    // Require using Error objects as Promise rejection reasons
     "prefer-promise-reject-errors": "error",
-
-    // Enforce “for” loop update clause moving the counter in the right direction
     "for-direction": "error",
-
-    // Enforce return statements in getters
     "getter-return": "error",
-
-    // Disallow await inside of loops
     "no-await-in-loop": "error",
-
-    // Disallow comparing against -0
     "no-compare-neg-zero": "error",
-
-    // Warn against catch clause parameters from shadowing variables in the outer scope
     "no-catch-shadow": "warn",
-
-    // Disallow identifiers from shadowing restricted names
     "no-shadow-restricted-names": "error",
-
-    // Enforce return statements in callbacks of array methods
     "callback-return": "error",
-
-    // Require error handling in callbacks
     "handle-callback-err": "error",
-
-    // Warn against string concatenation with __dirname and __filename
     "no-path-concat": "warn",
-
-    // Prefer using arrow functions for callbacks
     "prefer-arrow-callback": "warn",
     "prefer-const": "warn",
-
     "import/no-commonjs": "off"
   }
 }

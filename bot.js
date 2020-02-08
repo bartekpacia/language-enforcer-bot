@@ -100,9 +100,9 @@ bot.on("message", async msg => {
   if (detectedLang === LANG) {
     return
   } else {
-    const shouldPunish = await shouldPunish(msg)
+    const punish = await shouldPunish(msg)
 
-    if (shouldPunish) {
+    if (punish) {
       await rebuke(msg)
       // await mute(msg)
     }
