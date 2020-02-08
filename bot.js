@@ -33,20 +33,35 @@ bot.addListener("new_chat_members", async (msg, meta) => {
   await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members)")
 })
 
-// // Matches "/echo [whatever]"
-// bot.onText(/\/except(.+)/, (msg, match) => {
-//   // 'msg' is the received Message from Telegram
-//   // 'match' is the result of executing the regexp above on the text content
-//   // of the message
+bot.onText(/\/except (.+)/, async (msg, match) => {
+  const chatId = msg.chat.id
+  const userId = msg.from.id
 
-//   const chatId = msg.chat.id
-//   const resp = match[1] // the captured "whatever"
+  const chatMember = await bot.getChatMember(chatId, userId)
 
-//   console.log(resp)
+  if (chatMember.status === "administrator" || chatMember.status === "creator") {
+    // okay
+  } else {
+    console.log("User is not an admin. Returning")
+    return
+  }
 
-//   // send back the matched "whatever" to the chat
-//   // bot.sendMessage(chatId, resp)
-// })
+  // "match" is the result of executing the regexp above on the message's text
+  const textToBeIgnored = match[1].toLowerCase()
+
+  admin
+    .firestore()
+    .collection("exceptions")
+    .add({
+      text: textToBeIgnored
+    })
+
+  // send back the matched "whatever" to the chat
+  await bot.sendMessage(
+    chatId,
+    `Okay, "${textToBeIgnored}" has been added to the exception list :) `
+  )
+})
 
 bot.on("message", async msg => {
   if (msg.text === undefined) {
@@ -88,14 +103,6 @@ bot.on("message", async msg => {
   )
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
-
-  // await admin
-  //   .firestore()
-  //   .collection("messages")
-  //   .doc()
-  //   .create({
-  //     message: msg.text
-  //   })
 
   if (detectedLang === LANG) {
     return
@@ -152,12 +159,12 @@ async function shouldPunish(msg) {
     .collection("exceptions")
     .get()
 
-  exceptionsSnapshot.forEach(docSnapshot => {
-    const text = docSnapshot.get("text")
-    if (similarity.compareTwoStrings(text, msg.text) >= 0.85) {
-      return true
+  for (const doc of exceptionsSnapshot.docs) {
+    const text = doc.get("text")
+    if (similarity.compareTwoStrings(text, msg.text.toLowerCase()) >= 0.85) {
+      return false
     }
-  })
+  }
 
   return true
 }

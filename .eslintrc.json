@@ -16,7 +16,7 @@
     "no-debugger": "off",
     "no-unused-vars": "off",
     "no-undef": "error",
-    "consistent-return": "warn",
+    "consistent-return": "off",
     "array-callback-return": "warn",
     "eqeqeq": "error",
     "no-alert": "error",
