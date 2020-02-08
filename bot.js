@@ -33,6 +33,21 @@ bot.addListener("new_chat_members", async (msg, meta) => {
   await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members)")
 })
 
+// // Matches "/echo [whatever]"
+// bot.onText(/\/except(.+)/, (msg, match) => {
+//   // 'msg' is the received Message from Telegram
+//   // 'match' is the result of executing the regexp above on the text content
+//   // of the message
+
+//   const chatId = msg.chat.id
+//   const resp = match[1] // the captured "whatever"
+
+//   console.log(resp)
+
+//   // send back the matched "whatever" to the chat
+//   // bot.sendMessage(chatId, resp)
+// })
+
 bot.on("message", async msg => {
   if (msg.text === undefined) {
     console.log("Message doesn't contain text, returned.")
@@ -74,13 +89,13 @@ bot.on("message", async msg => {
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
-  await admin
-    .firestore()
-    .collection("messages")
-    .doc()
-    .create({
-      message: msg.text
-    })
+  // await admin
+  //   .firestore()
+  //   .collection("messages")
+  //   .doc()
+  //   .create({
+  //     message: msg.text
+  //   })
 
   if (detectedLang === LANG) {
     return
@@ -98,6 +113,7 @@ bot.on("message", async msg => {
  * @returns {boolean} true if user should be punished, false otherwise
  */
 function shouldPunish(msg) {
+  const testMessage = msg.text
   // Don't punish for short messages
   if (msg.text.length <= 4) {
     return false
@@ -108,17 +124,24 @@ function shouldPunish(msg) {
     return false
   }
 
-  if (msg.text.includes("XD")) {
+  // Add an exception for messages that contain XD letters only
+  let xdTest = testMessage.toLowerCase()
+  xdTest = xdTest.replace(/x/g, "")
+  xdTest = xdTest.replace(/d/g, "")
+  if (xdTest === "") {
     return false
   }
 
-  // Disable for commands
-  if (msg.text.startsWith("/")) {
+  // Disable for commands and mentions
+  if (msg.text.startsWith("/") || msg.text.startsWith("@")) {
     return false
   }
 
   // Allow uncontrolled laughter
-  if (msg.text.startsWith("hah") || msg.text.startsWith("hha")) {
+  let hahaTest = testMessage.toLowerCase()
+  hahaTest = hahaTest.replace(/h/g, "")
+  hahaTest = hahaTest.replace(/a/g, "")
+  if (hahaTest === "") {
     return false
   }
 
