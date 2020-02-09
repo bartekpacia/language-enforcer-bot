@@ -142,6 +142,10 @@ bot.on("message", async msg => {
     const punish = await shouldPunish(msg)
 
     if (punish) {
+      console.log(
+        `Punishing user ${msg.from.username}. Required lang: "${LANG}", detected lang: "${detectedLang}"`
+      )
+
       await rebuke(msg)
       // await mute(msg)
     }
@@ -199,9 +203,10 @@ async function shouldPunish(msg) {
   for (const doc of exceptionsSnapshot.docs) {
     const text = doc.get("text")
     const similarityLevel = similarity.compareTwoStrings(text, inputText)
-    console.log(`Similarity ${similarityLevel} between strings: "${text}" and "${inputText}" `)
-
     if (similarityLevel >= 0.8) {
+      console.log(
+        `Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`
+      )
       return false
     }
   }
