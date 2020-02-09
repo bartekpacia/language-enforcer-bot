@@ -13,7 +13,7 @@ admin.initializeApp({
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
-const LANG = process.env.LANGUAGE
+const LANG = process.env.REQUIRED_LANG
 
 const bot = new TelegramBot(TOKEN, { polling: true })
 
