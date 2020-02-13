@@ -22,6 +22,10 @@ const warningMessage = `You've been muted for 45 seconds for using a language ot
 
 console.log("Bot is running...")
 
+function is_admin(user) {
+  return (user.status === "creator" || user.status === "administrator" ? true : false)
+}
+
 bot.addListener("group_chat_created", async (msg, meta) => {
   await bot.sendMessage(
     msg.chat.id,
@@ -40,9 +44,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (chatMember.status === "administrator" || chatMember.status === "creator") {
-    // okay
-  } else {
+  if !(is_admin(chatMember)) {
     console.log("User is not an admin. Returned.")
     await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
     return
@@ -69,9 +71,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (chatMember.status === "administrator" || chatMember.status === "creator") {
-    // okay
-  } else {
+  if !(is_admin(chatMember)) {
     console.log("User is not an admin. Returned.")
     await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
     return
