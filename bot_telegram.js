@@ -22,25 +22,20 @@ const warningMessage = `You've been muted for 45 seconds for using a language ot
 
 console.log("Bot is running...")
 
-bot.addListener("group_chat_created", async (msg, meta) => {
-  await bot.sendMessage(
-    msg.chat.id,
-    "Hi all! Let's begin the rule of law and order! \n(triggered by event: group_chat_created)"
-  )
-})
+/**
+ * Returns true if the user is an admin or a creator, false otherwise.
+ */
+function isAdmin(chatMember) {
+  return chatMember.status === "administrator" || chatMember.status === "creator"
+}
 
-bot.addListener("new_chat_members", async (msg, meta) => {
-  await bot.sendMessage(msg.chat.id, "Hello! \n(triggered by event: new_chat_members).")
-})
-
-// Handles adding messages to the
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from.id
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (chatMember.status === "administrator" || chatMember.status === "creator") {
+  if (isAdmin(chatMember)) {
     // okay
   } else {
     console.log("User is not an admin. Returned.")
@@ -69,7 +64,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (chatMember.status === "administrator" || chatMember.status === "creator") {
+  if (isAdmin(chatMember)) {
     // okay
   } else {
     console.log("User is not an admin. Returned.")
