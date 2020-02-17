@@ -4,12 +4,9 @@ const admin = require("firebase-admin")
 const request = require("request-promise-native")
 const similarity = require("string-similarity")
 const TelegramBot = require("node-telegram-bot-api")
+const core = require("./core")
 
 const serviceAccount = require("./serviceAccountKey.json")
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-})
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY
@@ -46,15 +43,13 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
   // "match" is the result of executing the regexp above on the message's text
   const inputText = match[1].toLowerCase()
 
-  await admin
-    .firestore()
-    .collection("exceptions")
-    .add({
-      text: inputText
-    })
+  const successful = await core.addException(inputText)
 
-  // send back the matched "whatever" to the chat
-  await bot.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
+  if (successful) {
+    await bot.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
+  } else {
+    await bot.sendMessage(chatId, `An error occurred while adding the word ${successful}`)
+  }
 })
 
 // Handles removing messages from the database
@@ -75,18 +70,14 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
   // "match" is the result of executing the regexp above on the message's text
   const inputText = match[1].toLowerCase()
 
-  const exceptionsSnapshot = await admin
-    .firestore()
-    .collection("exceptions")
-    .where("text", "==", inputText)
-    .get()
-
-  for (const doc of exceptionsSnapshot.docs) {
-    doc.ref.delete() // bear in mind we are not waiting here for a Promise to be resolved
-  }
+  const successful = await core.removeException(inputText)
 
   // send back the matched "whatever" to the chat
-  await bot.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
+  if (successful) {
+    await bot.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
+  } else {
+    await bot.sendMessage(chatId, `An error occurred while removing the word ${successful}`)
+  }
 })
 
 // Handles all messages and checks whether they're in the specified language
@@ -102,112 +93,20 @@ bot.on("message", async msg => {
     return
   }
 
-  const options = {
-    uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_KEY}`,
-    method: "POST",
-    json: true,
-    body: {
-      q: msg.text
-    }
-  }
+  const isCorrectLanguage = await core.isCorrectLanguage(msg.text, msg.from.username)
 
-  let response
-  try {
-    response = await request(options)
-  } catch (err) {
-    console.log(err.message)
-    await bot.sendMessage(msg.chat.id, "Ouch, I just crashed! Somebody please fix me :/")
-    return
-  }
-
-  const detectedLang = response.data.detections[0][0].language
-  const confidence = response.data.detections[0][0].confidence
-  const isReliable = response.data.detections[0][0].isReliable
-  console.log(
-    `Lang: ${detectedLang}, isReliable: ${isReliable}, confidence: ${confidence.toPrecision(
-      3
-    )}, message: ${msg.text}`
-  )
-
-  // console.log(JSON.stringify(response)) Uncomment to log API whole response
-
-  if (detectedLang === LANG) {
+  if (isCorrectLanguage) {
     return
   } else {
-    const punish = await shouldPunish(msg)
+    const isException = await core.shouldBePermitted(msg.text)
 
-    if (punish) {
-      console.log(
-        `Punishing user ${msg.from.username}. Required lang: "${LANG}", detected lang: "${detectedLang}"`
-      )
-
+    if (isException) {
+      console.log(`Punishing user ${msg.from.username}. Required lang: "${LANG}"`)
       await rebuke(msg)
       // await mute(msg)
     }
   }
 })
-
-/**
- * Determines whether the user should be punished for his message.
- * @param {TelegramBot.Message} msg Telegram Message object
- * @returns {Promise<boolean>} true if user should be punished, false otherwise
- */
-async function shouldPunish(msg) {
-  const inputText = msg.text.toLowerCase()
-  // Don't punish for short messages
-  if (msg.text.length <= 4) {
-    return false
-  }
-
-  // Don't punish if user's name occurs in the message
-  if (msg.text.includes(msg.chat.first_name) || msg.text.includes(msg.chat.last_name)) {
-    return false
-  }
-
-  // Disable for commands and mentions
-  if (msg.text.startsWith("/") || msg.text.startsWith("@")) {
-    return false
-  }
-
-  // Add an exception for messages that contain XD letters only
-  let xdTest = inputText
-  xdTest = xdTest.replace(/x/g, "")
-  xdTest = xdTest.replace(/d/g, "")
-  if (xdTest === "") {
-    return false
-  }
-
-  // Allow uncontrolled laughter
-  let hahaTest = inputText
-  hahaTest = hahaTest.replace(/h/g, "")
-  hahaTest = hahaTest.replace(/a/g, "")
-  if (hahaTest === "") {
-    return false
-  }
-
-  // Allow messages with links
-  if (inputText.includes("https://")) {
-    return false
-  }
-
-  const exceptionsSnapshot = await admin
-    .firestore()
-    .collection("exceptions")
-    .get()
-
-  for (const doc of exceptionsSnapshot.docs) {
-    const text = doc.get("text")
-    const similarityLevel = similarity.compareTwoStrings(text, inputText)
-    if (similarityLevel >= 0.8) {
-      console.log(
-        `Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`
-      )
-      return false
-    }
-  }
-
-  return true
-}
 
 /**
  * Politely reminds the user to use only the specified language
