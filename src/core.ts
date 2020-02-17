@@ -1,29 +1,31 @@
 /**
  * Core logic of the bot, platform-independent.
- * @module core-bot
+ * This file should be considered as a handy toolkit which makes it much easier
+ * to write implementations for particular bots.
  */
 
-//@flow
-require("dotenv").config()
-const request = require("request-promise-native")
-const admin = require("firebase-admin")
-const similarity = require("string-similarity")
+import * as dotenv from "dotenv"
+dotenv.config()
 
-if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
-if (!process.env.GCP_API_KEY) throw new Error("GCP_API_KEY is missing!")
+import * as request from "request-promise-native"
+import * as admin from "firebase-admin"
+import * as similarity from "string-similarity"
 
-const TOKEN = process.env.TOKEN
-const GCP_API_KEY = process.env.GCP_API_KEY
-const LANG = process.env.REQUIRED_LANG || "en"
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.PROJECT_ID,
+    clientEmail: process.env.CLIENT_EMAIL,
+    privateKey: process.env.PRIVATE_KEY
+  })
+})
 
-const serviceAccount = require("../serviceAccountKey.json")
-
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) })
+const { GCP_API_KEY } = process.env
+const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
 
 /**
- * @returns {Promise<boolean>} true if the message is in the correct language, false otherwise
+ * @return true if the message is in the correct language, false otherwise
  */
-async function isCorrectLanguage(messageText: string, senderUsername: string): Promise<boolean> {
+async function isCorrectLanguage(messageText: string): Promise<boolean> {
   const options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_API_KEY}`,
     method: "POST",
@@ -33,17 +35,18 @@ async function isCorrectLanguage(messageText: string, senderUsername: string): P
     }
   }
 
-  let response = {}
+  let data
   try {
-    response = await request(options)
+    const response = await request(options)
+    data = response.data
   } catch (err) {
     console.error(err.message)
     console.error("This error is not handled because it should never happen.")
   }
 
-  const detectedLang = response.data.detections[0][0].language
-  const confidence = response.data.detections[0][0].confidence
-  const isReliable = response.data.detections[0][0].isReliable
+  const detectedLang = data.detections[0][0].language
+  const { confidence } = data.detections[0][0]
+  const { isReliable } = data.detections[0][0]
 
   console.log(
     `Lang: ${detectedLang}, isReliable: ${isReliable}, confidence: ${confidence.toPrecision(
@@ -53,7 +56,7 @@ async function isCorrectLanguage(messageText: string, senderUsername: string): P
 
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
-  return detectedLang === LANG
+  return detectedLang === REQUIRED_LANG
 }
 
 /**
@@ -84,7 +87,7 @@ async function addException(messageText: string): Promise<boolean> {
  * @param {string} messageText message's text
  * @returns {Promise<bool>} true if the operation is successful, false otherwise
  */
-async function removeException(messageText: string) {
+async function removeException(messageText: string): Promise<boolean> {
   // "match" is the result of executing the regexp above on the message's text
   const inputText = messageText.toLowerCase()
 
@@ -111,7 +114,7 @@ async function removeException(messageText: string) {
  * @param {string} messageText message's text
  * @returns {Promise<boolean>} true if user should be punished, false otherwise
  */
-async function shouldBePermitted(messageText: string) {
+async function shouldBePermitted(messageText: string): Promise<boolean> {
   const inputText = messageText.toLowerCase()
 
   // Don't punish for short messages
@@ -169,7 +172,4 @@ async function shouldBePermitted(messageText: string) {
   return true
 }
 
-exports.isCorrectLanguage = isCorrectLanguage
-exports.shouldBePermitted = shouldBePermitted
-exports.addException = addException
-exports.removeException = removeException
+export { isCorrectLanguage, shouldBePermitted, addException, removeException }

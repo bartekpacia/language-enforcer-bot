@@ -12,29 +12,36 @@
     "telegram",
     "bot"
   ],
-  "main": "bot.js",
   "scripts": {
-    "build": "flow-remove-types src/ -d lib/",
+    "lint": "./node_modules/.bin/eslint --ext js,ts src",
+    "build": "tsc",
     "start": "node lib/bot_telegram.js",
-    "flow": "flow",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "dotenv": "^6.2.0",
     "firebase-admin": "^8.9.2",
     "node-telegram-bot-api": "^0.30.0",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "request-promise-native": "^1.0.7",
     "string-similarity": "^4.0.1"
   },
   "devDependencies": {
+    "@types/node": "^13.7.1",
+    "@types/node-telegram-bot-api": "^0.40.2",
+    "@types/request": "^2.48.3",
+    "@types/request-promise-native": "^1.0.17",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
     "babel-eslint": "^10.0.3",
     "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
-    "flow-bin": "^0.118.0",
-    "flow-remove-types": "^2.118.0",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2"
   }
 }

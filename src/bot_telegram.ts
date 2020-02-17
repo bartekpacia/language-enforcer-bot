@@ -1,31 +1,35 @@
-// Load .env file that has TOKEN
-require("dotenv").config()
-const request = require("request-promise-native")
-const similarity = require("string-similarity")
-const TelegramBot = require("node-telegram-bot-api")
-const core = require("./core")
+/**
+ * Telegram Bot. It takes advantage of the functions defined in core.ts.
+ */
 
-const TOKEN = process.env.TOKEN
-const GCP_KEY = process.env.GCP_API_KEY
-const LANG = process.env.REQUIRED_LANG
+import * as dotenv from "dotenv"
+dotenv.config()
+
+import * as TelegramBot from "node-telegram-bot-api"
+import * as core from "./core"
+
+if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+
+const { TOKEN } = process.env
+const { REQUIRED_LANG } = process.env
 
 const bot = new TelegramBot(TOKEN, { polling: true })
 
-const rebukeMessage = `Incorrect language detected. Please use only: ${LANG}`
-const warningMessage = `You've been muted for 45 seconds for using a language other than: ${LANG}`
+const rebukeMessage = `Incorrect language detected. Please use only: ${REQUIRED_LANG}`
+const warningMessage = `You've been muted for 45 seconds for using a language other than: ${REQUIRED_LANG}`
 
 console.log("Bot is running...")
 
 /**
  * Returns true if the user is an admin or a creator, false otherwise.
  */
-function isAdmin(chatMember) {
+function isAdmin(chatMember: TelegramBot.ChatMember): boolean {
   return chatMember.status === "administrator" || chatMember.status === "creator"
 }
 
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from.id
+  const userId = msg.from!.id.toString()
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
@@ -54,7 +58,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from.id
 
-  const chatMember = await bot.getChatMember(chatId, userId)
+  const chatMember = await bot.getChatMember(chatId, userId.toString())
 
   if (isAdmin(chatMember)) {
     // okay
@@ -90,15 +94,13 @@ bot.on("message", async msg => {
     return
   }
 
-  const isCorrectLanguage = await core.isCorrectLanguage(msg.text, msg.from.username)
+  const isCorrectLanguage = await core.isCorrectLanguage(msg.text)
 
-  if (isCorrectLanguage) {
-    return
-  } else {
+  if (!isCorrectLanguage) {
     const isException = await core.shouldBePermitted(msg.text)
 
     if (isException) {
-      console.log(`Punishing user ${msg.from.username}. Required lang: "${LANG}"`)
+      console.log(`Punishing user ${msg.from.username}. Required lang: "${REQUIRED_LANG}"`)
       await rebuke(msg)
       // await mute(msg)
     }
@@ -109,7 +111,7 @@ bot.on("message", async msg => {
  * Politely reminds the user to use only the specified language
  * @param {TelegramBot.Message} msg Telegram Message object
  */
-async function rebuke(msg) {
+async function rebuke(msg: TelegramBot.Message): Promise<void> {
   await bot.sendMessage(msg.chat.id, rebukeMessage, {
     reply_to_message_id: msg.message_id
   })
@@ -120,16 +122,16 @@ async function rebuke(msg) {
  * TODO: Make the unmute work X D
  * @param {TelegramBot.Message} msg Telegram Message object
  */
-async function mute(msg) {
-  await bot.sendMessage(msg.chat.id, warningMessage, {
-    reply_to_message_id: msg.message_id
-  })
+// async function mute(msg: TelegramBot.Message): Promise<void> {
+//   await bot.sendMessage(msg.chat.id, warningMessage, {
+//     reply_to_message_id: msg.message_id
+//   })
 
-  await bot.restrictChatMember(msg.chat.id, msg.from.id, {
-    can_send_messages: false
-  })
+//   await bot.restrictChatMember(msg.chat.id, +msg.from.id, {
+//     can_send_messages: false
+//   })
 
-  setTimeout(async () => {
-    await bot.restrictChatMember(msg.chat.id, msg.from.id, true)
-  }, 45000)
-}
+//   setTimeout(async () => {
+//     await bot.restrictChatMember(msg.chat.id, +msg.from.id, true)
+//   }, 45000)
+// }

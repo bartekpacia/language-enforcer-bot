@@ -1,50 +1,51 @@
 {
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2017,
-    "sourceType": "script"
+    "ecmaVersion": 2017
   },
-  "parser": "babel-eslint",
-  "plugins": ["prettier", "promise", "import"],
+  "extends": [
+    "airbnb-base",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended",
+    "plugin:import/recommended",
+    "plugin:promise/recommended"
+  ],
+  "plugins": ["@typescript-eslint", "prettier", "promise", "import"],
   "env": {
     "node": true,
     "es6": true
   },
-  "extends": ["eslint:recommended", "plugin:promise/recommended", "plugin:import/recommended"],
   "rules": {
-    "prettier/prettier": "warn",
     "no-console": "off",
-    "no-var": "warn",
-    "no-debugger": "off",
-    "no-unused-vars": "off",
-    "no-undef": "error",
-    "consistent-return": "off",
-    "array-callback-return": "warn",
-    "eqeqeq": "error",
-    "no-alert": "error",
-    "no-caller": "error",
-    "no-eq-null": "error",
-    "no-eval": "error",
-    "no-extend-native": "warn",
-    "no-extra-bind": "warn",
-    "no-extra-label": "warn",
-    "no-floating-decimal": "error",
-    "no-implicit-coercion": "warn",
-    "no-loop-func": "warn",
-    "no-new-func": "error",
-    "no-new-wrappers": "warn",
-    "no-throw-literal": "error",
-    "prefer-promise-reject-errors": "error",
-    "for-direction": "error",
-    "getter-return": "error",
-    "no-await-in-loop": "error",
-    "no-compare-neg-zero": "error",
-    "no-catch-shadow": "warn",
-    "no-shadow-restricted-names": "error",
-    "callback-return": "error",
-    "handle-callback-err": "error",
-    "no-path-concat": "warn",
-    "prefer-arrow-callback": "warn",
-    "prefer-const": "warn",
-    "import/no-commonjs": "off"
+    "no-restricted-syntax": "off",
+    "import/first": "off",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "mjs": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "import/newline-after-import": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/camelcase": ["error", { "properties": "never" }]
+  },
+
+  // Needed for eslint-plugin-import to correctly detect .ts files
+  "settings": {
+    "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
   }
 }
