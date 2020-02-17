@@ -3,6 +3,7 @@
     "ecmaVersion": 2017,
     "sourceType": "script"
   },
+  "parser": "babel-eslint",
   "plugins": ["prettier", "promise", "import"],
   "env": {
     "node": true,

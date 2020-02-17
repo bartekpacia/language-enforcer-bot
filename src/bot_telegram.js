@@ -1,12 +1,9 @@
 // Load .env file that has TOKEN
 require("dotenv").config()
-const admin = require("firebase-admin")
 const request = require("request-promise-native")
 const similarity = require("string-similarity")
 const TelegramBot = require("node-telegram-bot-api")
 const core = require("./core")
-
-const serviceAccount = require("./serviceAccountKey.json")
 
 const TOKEN = process.env.TOKEN
 const GCP_KEY = process.env.GCP_API_KEY

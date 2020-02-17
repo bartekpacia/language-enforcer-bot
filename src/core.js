@@ -2,25 +2,30 @@
  * Core logic of the bot, platform-independent.
  * @module core-bot
  */
+
+//@flow
 require("dotenv").config()
 const request = require("request-promise-native")
 const admin = require("firebase-admin")
 const similarity = require("string-similarity")
 
+if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+if (!process.env.GCP_API_KEY) throw new Error("GCP_API_KEY is missing!")
+
 const TOKEN = process.env.TOKEN
-const GCP_KEY = process.env.GCP_API_KEY
-const LANG = process.env.REQUIRED_LANG
+const GCP_API_KEY = process.env.GCP_API_KEY
+const LANG = process.env.REQUIRED_LANG || "en"
+
+const serviceAccount = require("../serviceAccountKey.json")
+
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) })
 
 /**
- *
- * @param {string} messageText text of the message
- * @param {string} senderUsername username of the person who sent this message
  * @returns {Promise<boolean>} true if the message is in the correct language, false otherwise
- * @alias module:core-bot
  */
-async function isCorrectLanguage(messageText, senderUsername) {
+async function isCorrectLanguage(messageText: string, senderUsername: string): Promise<boolean> {
   const options = {
-    uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_KEY}`,
+    uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_API_KEY}`,
     method: "POST",
     json: true,
     body: {
@@ -28,7 +33,7 @@ async function isCorrectLanguage(messageText, senderUsername) {
     }
   }
 
-  let response
+  let response = {}
   try {
     response = await request(options)
   } catch (err) {
@@ -53,10 +58,9 @@ async function isCorrectLanguage(messageText, senderUsername) {
 
 /**
  * Adds the specified text to the database.
- * @param {string} messageText message's text
- * @returns {Promise<bool>} true if the operation is successful, false otherwise
+ * @returns {Promise<boolean>} true if the operation is successful, false otherwise
  */
-async function addException(messageText) {
+async function addException(messageText: string): Promise<boolean> {
   // "match" is the result of executing the regexp above on the message's text
   const inputText = messageText.toLowerCase()
 
@@ -80,7 +84,7 @@ async function addException(messageText) {
  * @param {string} messageText message's text
  * @returns {Promise<bool>} true if the operation is successful, false otherwise
  */
-async function removeException(messageText) {
+async function removeException(messageText: string) {
   // "match" is the result of executing the regexp above on the message's text
   const inputText = messageText.toLowerCase()
 
@@ -107,11 +111,11 @@ async function removeException(messageText) {
  * @param {string} messageText message's text
  * @returns {Promise<boolean>} true if user should be punished, false otherwise
  */
-async function shouldBePermitted(messageText) {
-  const inputText = messageText.text.toLowerCase()
+async function shouldBePermitted(messageText: string) {
+  const inputText = messageText.toLowerCase()
 
   // Don't punish for short messages
-  if (messageText.text.length <= 4) {
+  if (messageText.length <= 4) {
     return false
   }
 
