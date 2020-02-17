@@ -1,4 +1,4 @@
-# LangPolizei (Lanugage Police)
+# LangPolizei (Language Police)
 
 Telegram bot to enforce one language in the _group_ chat. How does it do it?
 
@@ -6,7 +6,7 @@ If LangPolizei detects that the language doesn't match the one specified in `.en
 
 ## Usage
 
-The bot, once added to the group chat, should be granted with admin priviliges. Admins can also add particular words as "exceptions". The bot will be relaxed about them in the future.
+The bot once added to the group chat, should be granted with admin privileges. Admins can also add particular words as "exceptions". The bot will be relaxed about them in the future.
 
 **To add or remove an exception**
 
@@ -21,12 +21,12 @@ or
 ## Structure
 
 This project emerged from a Telegram group of [Google Code-in 2019](https://codein.withgoogle.com/) winners.
-A first working version was created in less than 1 day by me with help of some other people. Initially, it was just another fun project written in JavaScript. As it grew and features were added, I rewrote it TypeScript and modularized to make it possible to add support for messaging platforms.
+A first working version was created in less than 1 day by me with the help of some other people. Initially, it was just another fun project written in JavaScript. As it grew and features were added, I rewrote it TypeScript and modularized to make it possible to add support for messaging platforms.
 
-This project is basically a toolkit containing some useful methods (gathered in [`src/core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)) and actual
+This project is a toolkit containing some useful methods (gathered in [`src/core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)) and actual
 bot implementations for particular platforms (currently only for Telegram – [`bot_telegram.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_telegram.ts)).
 
-[`core.js`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts) in completely platform-independent.
+[`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts) in completely platform-independent.
 
 It uses:
 
@@ -44,7 +44,7 @@ happy to help you. No one has ever done that before, so you'll be our first earl
 2. You'll see that it does Telegram integration stuff and delegates the business logic to [`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)
 3. Try to somehow replicate the behavior of the Telegram Bot with your messenger platform of choice
 
-PS If you find any bugs or have some ingenious idea on how something could be imporoved, we'll be happy
+PS If you find any bugs or have some ingenious idea on how something could be improved, we'll be happy
 to accept your Pull Requests.
 
 ## Ideas:
@@ -52,7 +52,7 @@ to accept your Pull Requests.
 - ban only if `confidence` is big enough. If it isn't, don't mute, just send a message
   like "What you sent doesn't seem to be in English..." (**after evaluation: not a good solution,
   confidence is often wrong**)
-- make the bot truly heplful (suggested by @MatejMecka). Make it translate the messages
+- make the bot truly helpful (suggested by @MatejMecka). Make it translate the messages
   instead of banning people
 
 ## Example response from [Google Translate API](https://translation.googleapis.com/language/translate/v2/detect):
