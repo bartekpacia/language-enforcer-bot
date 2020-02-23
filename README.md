@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-### ⚠️ EXTREMELY STABLE ⚠️
-
-You are very unlikely to end up with most of the people in your group blocked :)
-
-# Not LangPolizei (Not Lanugage Police)
-
-Telegram bot to enforce none language in the group_ chat. How does it do it?
-
-If LangPolizei detects that the language doesn't match the one specified in `.env` file,
-it doesn't mute the user for 45 seconds.
-=======
 # LangPolizei (German for Language Police)
 
 Toolkit and Telegram Bot to enforce one language in the _group_ chat. How does it do it?
@@ -19,7 +7,6 @@ If LangPolizei detects that the language doesn't match the one specified in `.en
 ## Usage
 
 The bot, once added to the group chat, should be granted with admin priviliges. Admins can also add particular words as "exceptions". The bot will be relaxed about them in the future.
->>>>>>> 2aad4251dfd2db213817cbe85cd28e1f7246a52f
 
 **To add or remove an exception**
 
@@ -110,12 +97,3 @@ to accept your Pull Requests.
   }
 }
 ```
-<<<<<<< HEAD
-
-## Ideas:
-
-- ban only if `confidence` is big enough. If it isn't, don't mute, just send a message
-  like "What you sent doesn't seem to be in English..."
-
-=======
->>>>>>> 2aad4251dfd2db213817cbe85cd28e1f7246a52f
