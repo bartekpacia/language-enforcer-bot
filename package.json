@@ -27,6 +27,7 @@
     "string-similarity": "^4.0.1"
   },
   "devDependencies": {
+    "@types/core-js": "^2.5.3",
     "@types/node": "^13.7.1",
     "@types/node-telegram-bot-api": "^0.40.2",
     "@types/request": "^2.48.3",

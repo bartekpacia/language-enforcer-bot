@@ -84,3 +84,6 @@ serviceAccountKey.json
 
 # generated files
 lib/
+
+# js binaries
+*.js
