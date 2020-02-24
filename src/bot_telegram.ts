@@ -31,7 +31,7 @@ function isAdmin(chatMember: TelegramBot.ChatMember): boolean {
 
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from!.id.toString()
+  const userId = msg.from?.id.toString()
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
@@ -104,12 +104,12 @@ bot.on("message", async msg => {
     if (isException) {
       console.log(`Punishing user ${msg.from.username}. Required lang: "${REQUIRED_LANG}"`)
       await rebuke(msg)
-      if(BE_HELPFUL){
+      if (BE_HELPFUL) {
         const translateResponse = await core.translateString(msg.text)
         await beHelpful(msg, translateResponse)
-      } 
-      if(MUTE_PEOPLE){
-       await mute(msg)
+      }
+      if (MUTE_PEOPLE) {
+        await mute(msg)
       }
     }
   }
@@ -130,29 +130,28 @@ async function rebuke(msg: TelegramBot.Message): Promise<void> {
  * @param {TelegramBot.Message} msg Telegram Message object
  */
 async function beHelpful(msg: TelegramBot.Message, translatedText: string): Promise<void> {
-  await bot.sendMessage(msg.chat.id, "${msg.from.username} said: ${translatedText}", {
+  await bot.sendMessage(msg.chat.id, `${msg.from.username} said: ${translatedText}`, {
     reply_to_message_id: msg.message_id
   })
 }
-
 
 /**
  * Temporarily mutes the user for sending the inappropriate messages.
  * TODO: Make the unmute work X D
  * @param {TelegramBot.Message} msg Telegram Message object
  */
- async function mute(msg: TelegramBot.Message): Promise<void> {
-   await bot.sendMessage(msg.chat.id, warningMessage, {
-     reply_to_message_id: msg.message_id
+async function mute(msg: TelegramBot.Message): Promise<void> {
+  await bot.sendMessage(msg.chat.id, warningMessage, {
+    reply_to_message_id: msg.message_id
   })
 
- await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
-     can_send_messages: false
+  await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
+    can_send_messages: false
   })
 
   setTimeout(async () => {
-     await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
+    await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
       can_send_messages: true
-     })
+    })
   }, 45000)
- }
+}

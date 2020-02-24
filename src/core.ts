@@ -173,11 +173,11 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
 }
 
 /**
- * It Translates the users message to the required language
+ * Translates the users message to the required language
  * @param {string} messageText message's text
  * @returns {Promise<string>} the translated messagee
  */
-async function translateString(messageText: string): Promise<string>{
+async function translateString(messageText: string): Promise<string> {
   const options = {
     uri: `https://translation.googleapis.com/language/translate/v2?key=${GCP_API_KEY}`,
     method: "POST",
@@ -185,7 +185,6 @@ async function translateString(messageText: string): Promise<string>{
     body: {
       q: messageText,
       target: REQUIRED_LANG
-
     }
   }
 
@@ -198,14 +197,11 @@ async function translateString(messageText: string): Promise<string>{
     console.error(err.message)
     console.error("This error is not handled because it should never happen.")
   }
-  
+
   const translatedMessage = data.translations[0].translatedText
   // console.log(JSON.stringify(response)) Uncomment to log API whole response
 
   return translatedMessage
-
-
-
 }
 
 export { isCorrectLanguage, shouldBePermitted, addException, removeException, translateString }
