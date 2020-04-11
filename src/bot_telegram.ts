@@ -26,7 +26,7 @@ const bot = new TelegramBot(TOKEN, { polling: true })
 /**
  * Returns true if the user is an admin or a creator, false otherwise.
  */
-function isAdmin(chatMember: TelegramBot.ChatMember): boolean {
+function isAdminUser(chatMember: TelegramBot.ChatMember): boolean {
   return chatMember.status === "administrator" || chatMember.status === "creator"
 }
 
@@ -37,7 +37,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (isAdmin(chatMember)) {
+  if (isAdminUser(chatMember)) {
     // okay
   } else {
     console.log("User is not an admin. Returned.")
@@ -64,7 +64,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId.toString())
 
-  if (isAdmin(chatMember)) {
+  if (isAdminUser(chatMember)) {
     // okay
   } else {
     console.log("User is not an admin. Returned.")
@@ -121,20 +121,28 @@ async function performAction(
   requiredLangName: string
 ): Promise<void> {
   console.log(`Perfoming action on user ${msg.from.first_name}...`)
-  let message = `Incorrect language detected (${detectedLangName}). Please use only ${requiredLangName}.\n`
+  let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
 
-  if (MUTE_PEOPLE) {
-    await mute(msg)
+  const chatMember = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
+
+  if (MUTE_PEOPLE && !isAdminUser(chatMember)) {
+    await mute(msg, chatMember)
     message += `You've been muted for ${BAN_TIMEOUT / 1000} seconds.\n`
   }
 
   if (BE_HELPFUL) {
     const translatedText = await core.translateString(msg.text)
-    message += `This douchebag tried to say: "${translatedText}"`
+
+    if (translatedText !== msg.text) {
+      message += `BTW, this douchebag tried to say: "${translatedText}"`
+    } else {
+      message += "BTW, I've no idea what this douchebag tried to say."
+    }
   }
 
   await bot.sendMessage(msg.chat.id, message, {
-    reply_to_message_id: msg.message_id
+    reply_to_message_id: msg.message_id,
+    parse_mode: "HTML"
   })
 }
 
@@ -143,13 +151,12 @@ async function performAction(
  * Mutes only if the user is not an admin.
  * @param {TelegramBot.Message} msg Telegram Message object
  */
-async function mute(msg: TelegramBot.Message): Promise<void> {
-  const chatMember = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
-  const admin = isAdmin(chatMember)
+async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): Promise<void> {
+  const isAdmin = isAdminUser(sender)
 
-  console.log(`mute() function invoked for user ${chatMember.user.first_name}, admin: ${admin}`)
+  console.log(`mute() function invoked for user ${sender.user.first_name}, isAdmin: ${isAdmin}`)
 
-  if (!admin) {
+  if (!isAdmin) {
     await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
       can_send_messages: false,
       can_send_media_messages: false,
@@ -157,7 +164,7 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
       can_add_web_page_previews: false
     })
 
-    console.log(`Muting user ${chatMember.user.first_name} for ${BAN_TIMEOUT / 1000} seconds.`)
+    console.log(`Muting user ${sender.user.first_name} for ${BAN_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
       await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
@@ -166,8 +173,8 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
         can_send_other_messages: true,
         can_add_web_page_previews: true
       })
-    }, BAN_TIMEOUT)
 
-    console.log(`Unmuted user ${chatMember.user.first_name}.`)
+      console.log(`Unmuted user ${sender.user.first_name}.`)
+    }, BAN_TIMEOUT)
   }
 }
