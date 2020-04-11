@@ -134,9 +134,9 @@ async function performAction(
     const translatedText = await core.translateString(msg.text)
 
     if (translatedText !== msg.text) {
-      message += `BTW, this douchebag tried to say: "${translatedText}"`
+      message += `BTW, they tried to say "${translatedText}"`
     } else {
-      message += "BTW, I've no idea what this douchebag tried to say."
+      message += "BTW, I've no idea what they tried to say."
     }
   }
 
