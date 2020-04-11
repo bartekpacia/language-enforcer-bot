@@ -16,14 +16,12 @@ const BE_HELPFUL = process.env.BE_HELPFUL === "true"
 const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
 const BAN_TIMEOUT = Number(process.env.BAN_TIMEOUT) || 30000
 
-console.log(`BE_HEPLFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, BAN_TIMEOUT: ${BAN_TIMEOUT}`)
+console.log()
+console.log(
+  `Bot is running. Some settings are:\nREQUIRED_LANG: ${REQUIRED_LANG}, BE_HEPLFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, BAN_TIMEOUT: ${BAN_TIMEOUT}`
+)
 
 const bot = new TelegramBot(TOKEN, { polling: true })
-
-const rebukeMessage = `Incorrect language detected. Please use only: ${REQUIRED_LANG}`
-const mutedMessage = `You've been muted for ${BAN_TIMEOUT} miliseconds for using a language other than: ${REQUIRED_LANG}`
-
-console.log("Bot is running...")
 
 /**
  * Returns true if the user is an admin or a creator, false otherwise.
@@ -32,6 +30,7 @@ function isAdmin(chatMember: TelegramBot.ChatMember): boolean {
   return chatMember.status === "administrator" || chatMember.status === "creator"
 }
 
+// Handles adding messages from the database
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from?.id.toString()
@@ -89,12 +88,12 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
 // Handles all messages and checks whether they're in the specified language
 bot.on("message", async msg => {
   if (msg.text === undefined) {
-    console.log("Message doesn't contain text, returned.")
+    console.log("Message doesn't contain text, returned. (msg.text === undefined)")
     return
   }
 
   if (msg.chat.type === "private") {
-    console.log("Message was sent in a private chat, returned.")
+    console.log("Message was sent in a private chat, returned. (msg.chat.type === private)")
     await bot.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
     return
   }
@@ -105,36 +104,30 @@ bot.on("message", async msg => {
     const permitted = await core.shouldBePermitted(msg.text)
 
     if (!permitted) {
-      await rebuke(msg)
-      if (BE_HELPFUL) {
-        const translateResponse = await core.translateString(msg.text)
-        await beHelpful(msg, translateResponse)
-      }
-      if (MUTE_PEOPLE) {
-        await mute(msg)
-      }
+      await performAction(msg)
     }
   }
 })
 
 /**
- * Politely reminds the user to use only the specified language
- * @param {TelegramBot.Message} msg Telegram Message object
+ * Performs an action on the user (whether to just remind him to use the
+ * specified language, or ban him).
  */
-async function rebuke(msg: TelegramBot.Message): Promise<void> {
-  console.log(`Rebuking user ${msg.from.username}. Required lang: "${REQUIRED_LANG}"`)
+async function performAction(msg: TelegramBot.Message): Promise<void> {
+  console.log(`Perfoming action on user ${msg.from.first_name}...`)
+  let message = `Incorrect language detected. Please use only: ${REQUIRED_LANG}.\n`
 
-  await bot.sendMessage(msg.chat.id, rebukeMessage, {
-    reply_to_message_id: msg.message_id
-  })
-}
+  if (MUTE_PEOPLE) {
+    await mute(msg)
+    message += `You've been muted for ${BAN_TIMEOUT / 1000} seconds.\n`
+  }
 
-/**
- * Politely is helpful and translates the message
- * @param {TelegramBot.Message} msg Telegram Message object
- */
-async function beHelpful(msg: TelegramBot.Message, translatedText: string): Promise<void> {
-  await bot.sendMessage(msg.chat.id, `${msg.from.username} said: ${translatedText}`, {
+  if (BE_HELPFUL) {
+    const translatedText = await core.translateString(msg.text)
+    message += `He tried to say: "${translatedText}"`
+  }
+
+  await bot.sendMessage(msg.chat.id, message, {
     reply_to_message_id: msg.message_id
   })
 }
@@ -151,10 +144,6 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
   console.log(`mute() function invoked for user ${chatMember.user.first_name}, admin: ${admin}`)
 
   if (!admin) {
-    await bot.sendMessage(msg.chat.id, mutedMessage, {
-      reply_to_message_id: msg.message_id
-    })
-
     await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
       can_send_messages: false,
       can_send_media_messages: false,
