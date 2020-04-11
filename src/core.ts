@@ -10,6 +10,7 @@ dotenv.config()
 import * as request from "request-promise-native"
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
+import * as languagesFile from "./languages.json"
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -23,9 +24,12 @@ const { GCP_API_KEY } = process.env
 const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
 
 /**
- * @return true if the message is in the correct language, false otherwise
+ * @return Tuple of boolean, string and string.
+ * boolean – true if the language is the specified language, false otherwise
+ * 1st string – full name of the detected language
+ * 2nd string – full name of the specified language
  */
-async function isCorrectLanguage(messageText: string): Promise<boolean> {
+async function isCorrectLanguage(messageText: string): Promise<[boolean, string, string]> {
   const options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_API_KEY}`,
     method: "POST",
@@ -44,6 +48,8 @@ async function isCorrectLanguage(messageText: string): Promise<boolean> {
     console.error("This error is not handled because it should never happen.")
   }
 
+  // console.log(JSON.stringify(response)) Uncomment to log API whole response
+
   const detectedLang = data.detections[0][0].language
   const { confidence } = data.detections[0][0]
   const { isReliable } = data.detections[0][0]
@@ -54,9 +60,15 @@ async function isCorrectLanguage(messageText: string): Promise<boolean> {
     )}, message: ${messageText}`
   )
 
-  // console.log(JSON.stringify(response)) Uncomment to log API whole response
+  const detectedLangFullName = languagesFile.data.languages.find(
+    ({ language }) => language === detectedLang
+  ).name
 
-  return detectedLang === REQUIRED_LANG
+  const requiredLangFullName = languagesFile.data.languages.find(
+    ({ language }) => language === REQUIRED_LANG
+  ).name
+
+  return [detectedLang === REQUIRED_LANG, detectedLangFullName, requiredLangFullName]
 }
 
 /**

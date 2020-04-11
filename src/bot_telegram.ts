@@ -98,13 +98,15 @@ bot.on("message", async msg => {
     return
   }
 
-  const isCorrectLanguage = await core.isCorrectLanguage(msg.text)
+  const [isCorrectLanguage, detectedLangName, requiredLangName] = await core.isCorrectLanguage(
+    msg.text
+  )
 
   if (!isCorrectLanguage) {
     const permitted = await core.shouldBePermitted(msg.text)
 
     if (!permitted) {
-      await performAction(msg)
+      await performAction(msg, detectedLangName, requiredLangName)
     }
   }
 })
@@ -113,9 +115,13 @@ bot.on("message", async msg => {
  * Performs an action on the user (whether to just remind him to use the
  * specified language, or ban him).
  */
-async function performAction(msg: TelegramBot.Message): Promise<void> {
+async function performAction(
+  msg: TelegramBot.Message,
+  detectedLangName: string,
+  requiredLangName: string
+): Promise<void> {
   console.log(`Perfoming action on user ${msg.from.first_name}...`)
-  let message = `Incorrect language detected. Please use only: ${REQUIRED_LANG}.\n`
+  let message = `Incorrect language detected (${detectedLangName}). Please use only ${requiredLangName}.\n`
 
   if (MUTE_PEOPLE) {
     await mute(msg)
@@ -124,7 +130,7 @@ async function performAction(msg: TelegramBot.Message): Promise<void> {
 
   if (BE_HELPFUL) {
     const translatedText = await core.translateString(msg.text)
-    message += `He tried to say: "${translatedText}"`
+    message += `This douchebag tried to say: "${translatedText}"`
   }
 
   await bot.sendMessage(msg.chat.id, message, {
@@ -151,6 +157,8 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
       can_add_web_page_previews: false
     })
 
+    console.log(`Muting user ${chatMember.user.first_name} for ${BAN_TIMEOUT / 1000} seconds.`)
+
     setTimeout(async () => {
       await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
         can_send_messages: true,
@@ -159,5 +167,7 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
         can_add_web_page_previews: true
       })
     }, BAN_TIMEOUT)
+
+    console.log(`Unmuted user ${chatMember.user.first_name}.`)
   }
 }
