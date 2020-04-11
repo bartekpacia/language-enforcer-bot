@@ -12,9 +12,11 @@ if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
 
 const { TOKEN } = process.env
 const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
-const BE_HELPFUL = process.env.BE_HELPFUL || false
-const MUTE_PEOPLE = process.env.MUTE_PEOPLE || false
+const BE_HELPFUL = process.env.BE_HELPFUL === "true"
+const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
 const BAN_TIMEOUT = Number(process.env.BAN_TIMEOUT) || 30000
+
+console.log(`BE_HEPLFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, BAN_TIMEOUT: ${BAN_TIMEOUT}`)
 
 const bot = new TelegramBot(TOKEN, { polling: true })
 
@@ -103,7 +105,6 @@ bot.on("message", async msg => {
     const isException = await core.shouldBePermitted(msg.text)
 
     if (isException) {
-      console.log(`Punishing user ${msg.from.username}. Required lang: "${REQUIRED_LANG}"`)
       await rebuke(msg)
       if (BE_HELPFUL) {
         const translateResponse = await core.translateString(msg.text)
@@ -121,6 +122,8 @@ bot.on("message", async msg => {
  * @param {TelegramBot.Message} msg Telegram Message object
  */
 async function rebuke(msg: TelegramBot.Message): Promise<void> {
+  console.log(`Rebuking user ${msg.from.username}. Required lang: "${REQUIRED_LANG}"`)
+
   await bot.sendMessage(msg.chat.id, rebukeMessage, {
     reply_to_message_id: msg.message_id
   })
@@ -153,12 +156,18 @@ async function mute(msg: TelegramBot.Message): Promise<void> {
     })
 
     await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
-      can_send_messages: false
+      can_send_messages: false,
+      can_send_media_messages: false,
+      can_send_other_messages: false,
+      can_add_web_page_previews: false
     })
 
     setTimeout(async () => {
       await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
-        can_send_messages: true
+        can_send_messages: true,
+        can_send_media_messages: true,
+        can_send_other_messages: true,
+        can_add_web_page_previews: true
       })
     }, BAN_TIMEOUT)
   }
