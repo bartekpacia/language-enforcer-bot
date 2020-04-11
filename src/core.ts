@@ -112,14 +112,14 @@ async function removeException(messageText: string): Promise<boolean> {
 /**
  * Determines whether the message contains some special variations that should be always allowed.
  * @param {string} messageText message's text
- * @returns {Promise<boolean>} true if user should be punished, false otherwise
+ * @returns {Promise<boolean>} true if the message should be permitted, false otherwise
  */
 async function shouldBePermitted(messageText: string): Promise<boolean> {
   const inputText = messageText.toLowerCase()
 
   // Don't punish for short messages
   if (messageText.length <= 4) {
-    return false
+    return true
   }
 
   // Don't punish if user's name occurs in the message
@@ -129,7 +129,7 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
 
   // Disable for commands and mentions
   if (messageText.startsWith("/") || messageText.startsWith("@")) {
-    return false
+    return true
   }
 
   // Add an exception for messages that contain XD letters only
@@ -137,7 +137,7 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   xdTest = xdTest.replace(/x/g, "")
   xdTest = xdTest.replace(/d/g, "")
   if (xdTest === "") {
-    return false
+    return true
   }
 
   // Allow uncontrolled laughter
@@ -145,12 +145,12 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   hahaTest = hahaTest.replace(/h/g, "")
   hahaTest = hahaTest.replace(/a/g, "")
   if (hahaTest === "") {
-    return false
+    return true
   }
 
   // Allow messages with links
   if (inputText.includes("https://")) {
-    return false
+    return true
   }
 
   const exceptionsSnapshot = await admin
@@ -165,11 +165,11 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
       console.log(
         `Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`
       )
-      return false
+      return true
     }
   }
 
-  return true
+  return false
 }
 
 /**

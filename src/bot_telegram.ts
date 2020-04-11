@@ -102,9 +102,9 @@ bot.on("message", async msg => {
   const isCorrectLanguage = await core.isCorrectLanguage(msg.text)
 
   if (!isCorrectLanguage) {
-    const isException = await core.shouldBePermitted(msg.text)
+    const permitted = await core.shouldBePermitted(msg.text)
 
-    if (isException) {
+    if (!permitted) {
       await rebuke(msg)
       if (BE_HELPFUL) {
         const translateResponse = await core.translateString(msg.text)
