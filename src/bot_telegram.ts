@@ -11,15 +11,15 @@ import * as core from "./core"
 if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
 
 const { TOKEN } = process.env
-const { REQUIRED_LANG } = process.env || "en"
-const { BE_HELPFUL } = process.env || false
-const { MUTE_PEOPLE } = process.env || false
-const { BAN_TIMEOUT } = process.env || 30000
+const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
+const BE_HELPFUL = process.env.BE_HELPFUL || false
+const MUTE_PEOPLE = process.env.MUTE_PEOPLE || false
+const BAN_TIMEOUT = Number(process.env.BAN_TIMEOUT) || 30000
 
 const bot = new TelegramBot(TOKEN, { polling: true })
 
 const rebukeMessage = `Incorrect language detected. Please use only: ${REQUIRED_LANG}`
-const warningMessage = `You've been muted for ${BAN_TIMEOUT} miliseconds for using a language other than: ${REQUIRED_LANG}`
+const mutedMessage = `You've been muted for ${BAN_TIMEOUT} miliseconds for using a language other than: ${REQUIRED_LANG}`
 
 console.log("Bot is running...")
 
@@ -137,17 +137,21 @@ async function beHelpful(msg: TelegramBot.Message, translatedText: string): Prom
 }
 
 /**
- * Temporarily mutes non-admin user for sending the inappropriate messages.
+ * Temporarily mutes the user for sending the inappropriate messages.
+ * Mutes only if the user is not an admin.
  * @param {TelegramBot.Message} msg Telegram Message object
  */
 async function mute(msg: TelegramBot.Message): Promise<void> {
-  await bot.sendMessage(msg.chat.id, warningMessage, {
-    reply_to_message_id: msg.message_id
-  })
-
   const chatMember = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
+  const admin = isAdmin(chatMember)
 
-  if (!isAdmin(chatMember)) {
+  console.log(`mute() function invoked for user ${chatMember.user.first_name}, admin: ${admin}`)
+
+  if (!admin) {
+    await bot.sendMessage(msg.chat.id, mutedMessage, {
+      reply_to_message_id: msg.message_id
+    })
+
     await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
       can_send_messages: false
     })
