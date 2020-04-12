@@ -112,8 +112,8 @@ bot.on("message", async msg => {
 })
 
 /**
- * Performs an action on the user (whether to just remind him to use the
- * specified language, or ban him).
+ * Performs an action on the user. An action is e.g rebuking the user or muting him
+ * for some time.
  */
 async function performAction(
   msg: TelegramBot.Message,
