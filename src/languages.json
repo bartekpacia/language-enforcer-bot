@@ -62,6 +62,10 @@
         "name": "Chinese (Simplified)"
       },
       {
+        "language": "zh-CN",
+        "name": "Chinese (Simplified)"
+      },
+      {
         "language": "zh-TW",
         "name": "Chinese (Traditional)"
       },
