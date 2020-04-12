@@ -39,6 +39,12 @@ Do `git clone` and `npm install`. You'll also need to set a few environment vari
 
 `PRIVATE_KEY` - Firebase Service Account's private key
 
+`BE_HELPFUL` - `true` if bot should translate messages, `false` otherwise
+
+`MUTE_PEOPLE` – `true` if the bot should mute people for using bad language, `false` otherwise
+
+`BAN_TIMEOUT` – mute duration, in miliseconds (default 30 000)
+
 It uses [Cloud Firestore](https://firebase.google.com/products/firestore), so you'll need to create a new Firestore project.
 
 ## Structure
