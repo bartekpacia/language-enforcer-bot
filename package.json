@@ -15,6 +15,7 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint --ext js,ts src",
     "build": "tsc",
+    "gcp-build": "npm run build",
     "start": "node lib/bot_telegram.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
