@@ -37,9 +37,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 
   const chatMember = await bot.getChatMember(chatId, userId)
 
-  if (isAdminUser(chatMember)) {
-    // okay
-  } else {
+  if (!isAdminUser(chatMember)) {
     console.log("User is not an admin. Returned.")
     await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
     return
@@ -98,15 +96,18 @@ bot.on("message", async msg => {
     return
   }
 
-  const [isCorrectLanguage, detectedLangName, requiredLangName] = await core.isCorrectLanguage(
-    msg.text
-  )
+  const [
+    isCorrectLanguage,
+    detectedLangName,
+    requiredLangName,
+    translatedText
+  ] = await core.checkAndTranslate(msg.text)
 
   if (!isCorrectLanguage) {
     const permitted = await core.shouldBePermitted(msg.text)
 
     if (!permitted) {
-      await performAction(msg, detectedLangName, requiredLangName)
+      await performAction(msg, detectedLangName, requiredLangName, translatedText)
     }
   }
 })
@@ -118,7 +119,8 @@ bot.on("message", async msg => {
 async function performAction(
   msg: TelegramBot.Message,
   detectedLangName: string,
-  requiredLangName: string
+  requiredLangName: string,
+  translatedText: string
 ): Promise<void> {
   console.log(`Perfoming action on user ${msg.from.first_name}...`)
   let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
@@ -131,8 +133,6 @@ async function performAction(
   }
 
   if (BE_HELPFUL) {
-    const translatedText = await core.translateString(msg.text)
-
     if (translatedText !== msg.text) {
       message += `BTW, they tried to say "${translatedText}"`
     } else {

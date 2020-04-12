@@ -7,57 +7,45 @@
 import * as dotenv from "dotenv"
 dotenv.config()
 
-import * as request from "request-promise-native"
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
+import * as translate from "translation-google"
 import * as languagesFile from "./languages.json"
 
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.PROJECT_ID,
     clientEmail: process.env.CLIENT_EMAIL,
-    privateKey: process.env.PRIVATE_KEY
+    privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, "\n")
   })
 })
 
-const { GCP_API_KEY } = process.env
 const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
 
 /**
- * @return Tuple of boolean, string and string.
+ * @return Tuple of boolean, string, string and string.
  * boolean – true if the language is the specified language, false otherwise
  * 1st string – full name of the detected language
  * 2nd string – full name of the specified language
+ * 3rd string - translated text
  */
-async function isCorrectLanguage(messageText: string): Promise<[boolean, string, string]> {
-  const options = {
-    uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${GCP_API_KEY}`,
-    method: "POST",
-    json: true,
-    body: {
-      q: messageText
-    }
-  }
-
+async function checkAndTranslate(messageText: string): Promise<[boolean, string, string, string]> {
   let data
   try {
-    const response = await request(options)
-    data = response.data
-  } catch (err) {
-    console.error(err.message)
-    console.error("This error is not handled because it should never happen.")
+    data = await translate(messageText, { raw: true, to: "en" })
+  } catch (e) {
+    console.error(e)
+    console.error("This error is not handled because it should never happen")
   }
 
-  // console.log(JSON.stringify(response)) Uncomment to log API whole response
+  // console.log(JSON.stringify(data)) Uncomment to log API whole response
 
-  const detectedLang = data.detections[0][0].language
-  const { confidence } = data.detections[0][0]
-  const { isReliable } = data.detections[0][0]
+  const detectedLang = data.from.language.iso
+  const confidence = JSON.parse(data.raw)[6]
+  const translatedText = data.text
 
   console.log(
-    `Lang: ${detectedLang}, isReliable: ${isReliable}, confidence: ${confidence.toPrecision(
-      3
-    )}, message: ${messageText}`
+    `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${messageText}`
   )
 
   const detectedLangFullName = languagesFile.data.languages.find(
@@ -70,10 +58,15 @@ async function isCorrectLanguage(messageText: string): Promise<[boolean, string,
 
   if (confidence < 0.7) {
     console.log(`Confidence is too small. Returning...`)
-    return [true, detectedLangFullName, requiredLangFullName]
+    return [true, detectedLangFullName, requiredLangFullName, messageText]
   }
 
-  return [detectedLang === REQUIRED_LANG, detectedLangFullName, requiredLangFullName]
+  return [
+    detectedLang === REQUIRED_LANG,
+    detectedLangFullName,
+    requiredLangFullName,
+    translatedText
+  ]
 }
 
 /**
@@ -189,36 +182,4 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   return false
 }
 
-/**
- * Translates the users message to the required language
- * @param {string} messageText message's text
- * @returns {Promise<string>} the translated messagee
- */
-async function translateString(messageText: string): Promise<string> {
-  const options = {
-    uri: `https://translation.googleapis.com/language/translate/v2?key=${GCP_API_KEY}`,
-    method: "POST",
-    json: true,
-    body: {
-      q: messageText,
-      target: REQUIRED_LANG
-    }
-  }
-
-  let data
-
-  try {
-    const response = await request(options)
-    data = response.data
-  } catch (err) {
-    console.error(err.message)
-    console.error("This error is not handled because it should never happen.")
-  }
-
-  const translatedMessage = data.translations[0].translatedText
-  // console.log(JSON.stringify(response)) Uncomment to log API whole response
-
-  return translatedMessage
-}
-
-export { isCorrectLanguage, shouldBePermitted, addException, removeException, translateString }
+export { checkAndTranslate, shouldBePermitted, addException, removeException }

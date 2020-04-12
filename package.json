@@ -25,7 +25,8 @@
     "node-telegram-bot-api": "^0.30.0",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.7",
-    "string-similarity": "^4.0.1"
+    "string-similarity": "^4.0.1",
+    "translation-google": "^0.2.1"
   },
   "devDependencies": {
     "@types/core-js": "^2.5.3",
