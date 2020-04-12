@@ -68,8 +68,13 @@ async function isCorrectLanguage(messageText: string): Promise<[boolean, string,
     ({ language }) => language === REQUIRED_LANG
   ).name
 
+  if (detectedLang === "und") {
+    console.log(`Couldn't detect language (detectedLang === "und"). Returning...`)
+    return [true, detectedLangFullName, requiredLangFullName]
+  }
+
   if (confidence < 0.7) {
-    console.log(`Confidence is too small. Returning...`)
+    console.log(`Confidence is too small (${confidence}). Returning...`)
     return [true, detectedLangFullName, requiredLangFullName]
   }
 
