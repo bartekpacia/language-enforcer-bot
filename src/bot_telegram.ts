@@ -6,7 +6,7 @@ import * as TelegramBot from "node-telegram-bot-api"
 import * as core from "./core"
 import { TelegramConfig } from "./types_telegram"
 
-const config = core.config
+const { config } = core
 const telegramConfig = new TelegramConfig()
 
 const bot = new TelegramBot(telegramConfig.TOKEN, { polling: true })

@@ -20,6 +20,7 @@
     "no-console": "off",
     "no-restricted-syntax": "off",
     "import/first": "off",
+    "prefer-destructuring": ["error", { "array": false }],
     "import/extensions": [
       "error",
       "ignorePackages",
@@ -34,10 +35,8 @@
     "import/newline-after-import": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/camelcase": ["error", { "properties": "never" }],
-    "@typescript-eslint/interface-name-prefix": [
-      "error",
-      { "properties": { "prefixWithI": "always" } }
-    ]
+    "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" }],
+    "@typescript-eslint/no-var-requires": "warn"
   },
 
   // Needed for eslint-plugin-import to correctly detect .ts files
