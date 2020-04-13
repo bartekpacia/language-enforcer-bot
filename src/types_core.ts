@@ -37,10 +37,10 @@ export class CoreConfig {
     this.MUTE_PEOPLE = MUTE_PEOPLE
     this.MUTE_TIMEOUT = MUTE_TIMEOUT
 
-    console.log(
+    /* console.log(
       `Created CoreConfig object. REQUIRED_LANG: ${REQUIRED_LANG}, PROJECT_ID: ${PROJECT_ID}, CLIENT_EMAIL: ${CLIENT_EMAIL}, PRIVATE_KEY: (${PRIVATE_KEY !=
         null}), BE_HELPFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, MUTE_TIMEOUT: ${MUTE_TIMEOUT}`
-    )
+    ) */
   }
 }
 

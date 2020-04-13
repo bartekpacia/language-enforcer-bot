@@ -11,7 +11,6 @@ export class TelegramConfig {
 
     this.TOKEN = TOKEN
 
-    console.log(this.toString())
     // console.log(`Created TelegramConfig object. TOKEN: ${TOKEN}`)
   }
 }

@@ -24,13 +24,10 @@ admin.initializeApp({
 })
 
 /**
- * @return Tuple of boolean, string, string and string.
- * boolean – true if the language is the specified language, false otherwise
- * 1st string – full name of the detected language
- * 2nd string – full name of the specified language
- * 3rd string - translated text
+ * Translates the @param messageText and checks whether it is in the required language.
+ * @return TranslationData object or null
  */
-async function checkAndTranslate(messageText: string): Promise<TranslationData | null> {
+async function translateAndCheck(messageText: string): Promise<TranslationData | null> {
   let detectedLang
   let confidence
   let translatedText
@@ -203,4 +200,4 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   return false
 }
 
-export { checkAndTranslate, shouldBePermitted, addException, removeException }
+export { translateAndCheck as checkAndTranslate, shouldBePermitted, addException, removeException }
