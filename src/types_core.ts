@@ -18,7 +18,7 @@ export class CoreConfig {
     const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
     const PROJECT_ID = process.env.PROJECT_ID
     const CLIENT_EMAIL = process.env.CLIENT_EMAIL
-    const PRIVATE_KEY = process.env.PRIVATE_KEY
+    const PRIVATE_KEY = process.env.PRIVATE_KEY.replace(/\\n/g, "\n") // prevents dotenv escaping
     const BE_HELPFUL = process.env.BE_HELPFUL === "true"
     const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
     const MUTE_TIMEOUT = Number(process.env.MUTE_TIMEOUT) || 30000
