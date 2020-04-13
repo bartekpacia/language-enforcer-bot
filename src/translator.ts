@@ -1,27 +1,47 @@
 import * as request from "request-promise-native"
 import * as freeTranslationGoogle from "translation-google"
-import { Translation, TranslationContext } from "./types_core"
-import * as core from "./core"
+import { Translation, TranslationContext, CoreConfig } from "./types_core"
 import * as languagesFile from "./languages.json"
 
-const config = core.config
-
-export async function translateAndCheck(text: string): Promise<TranslationContext> {
-  const translation = await translate(text)
+export async function translateAndCheck(
+  text: string,
+  config: CoreConfig
+): Promise<TranslationContext> {
+  const translation = await translate(text, config)
 
   const requiredLangCode = config.REQUIRED_LANG
   const requiredLangName = findLangName(requiredLangCode)
 
-  const isCorrectLang = translation.detectedLangCode === requiredLangCode
+  let isCorrectLang = translation.detectedLangCode === requiredLangCode
+
+  if (translation.detectedLangCode === "und") {
+    console.log(
+      `Couldn't detect language (detectedLang === "und"). Assuming that isCorrectLang = true.`
+    )
+    isCorrectLang = true
+  }
+
+  if (translation.confidence < 0.7) {
+    console.log(
+      `Confidence is too small (${translation.confidence}). Assuming that isCorrectLang = true.`
+    )
+    isCorrectLang = true
+  }
 
   return new TranslationContext(isCorrectLang, requiredLangCode, requiredLangName, translation)
 }
 
-export async function translate(text: string): Promise<Translation> {
-  let translation = await translatePoor(text)
+export async function translate(text: string, config: CoreConfig): Promise<Translation> {
+  let translation = await translatePoor(text, config)
+  console.log("Attempted to use POOR translation method.")
+  console.log(translation)
 
   if (!translation) {
-    translation = await translateRich(text)
+    translation = await translateRich(text, config)
+
+    console.log("POOR translation failed. Attempted to use RICH translation method.")
+    console.log(translation)
+
     return translation
   }
 
@@ -31,7 +51,7 @@ export async function translate(text: string): Promise<Translation> {
 /**
  * Works always but the poor owner has to pay for it.
  */
-async function translateRich(text: string): Promise<Translation> {
+async function translateRich(text: string, config: CoreConfig): Promise<Translation> {
   const options = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${config.GCP_API_KEY}`,
     method: "POST",
@@ -64,7 +84,7 @@ async function translateRich(text: string): Promise<Translation> {
 /**
  * It works as long as a certain quota is not exceeded.
  */
-async function translatePoor(text: string): Promise<Translation | null> {
+async function translatePoor(text: string, config: CoreConfig): Promise<Translation | null> {
   try {
     const data = await freeTranslationGoogle(text, { raw: true, to: config.REQUIRED_LANG })
 
