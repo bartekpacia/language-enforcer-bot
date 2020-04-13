@@ -1,5 +1,3 @@
-import { CoreConfig } from "./types_core"
-
 /**
  * Telegram-specific configuration.
  */
