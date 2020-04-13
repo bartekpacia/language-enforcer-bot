@@ -26,7 +26,7 @@ admin.initializeApp({
  * Translates the @param messageText and checks whether it is in the required language.
  * @return TranslationData object or null
  */
-async function translateAndCheck(messageText: string): Promise<TranslationContext | null> {
+async function translateAndCheck(messageText: string): Promise<TranslationContext> {
   const translationContext = await translator.translateAndCheck(messageText, config)
 
   return translationContext

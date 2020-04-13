@@ -31,16 +31,16 @@ export async function translateAndCheck(
   return new TranslationContext(isCorrectLang, requiredLangCode, requiredLangName, translation)
 }
 
-export async function translate(text: string, config: CoreConfig): Promise<Translation> {
+async function translate(text: string, config: CoreConfig): Promise<Translation> {
   let translation = await translatePoor(text, config)
-  console.log("Attempted to use POOR translation method.")
-  console.log(translation)
+  // console.log("Attempted to use POOR translation method.")
+  // console.log(translation)
 
   if (!translation) {
     translation = await translateRich(text, config)
 
-    console.log("POOR translation failed. Attempted to use RICH translation method.")
-    console.log(translation)
+    // console.log("POOR translation failed. Attempted to use RICH translation method.")
+    // console.log(translation)
 
     return translation
   }
@@ -70,7 +70,7 @@ async function translateRich(text: string, config: CoreConfig): Promise<Translat
     process.exit(69)
   }
 
-  console.log(JSON.stringify(data))
+  // console.log(JSON.stringify(data)) // uncomment to print whole response
 
   const detectedLangCode = data.detections[0][0].language
   const confidence = data.detections[0][0].confidence
