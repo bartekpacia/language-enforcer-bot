@@ -59,7 +59,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 // Handles removing messages from the database
 bot.onText(/\/remove (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from?.id
+  const userId = msg.from.id
 
   if (!match) {
     console.log("match is undefined. Returned.")
@@ -90,7 +90,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
   if (successful) {
     await bot.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
   } else {
-    await bot.sendMessage(chatId, `An error occurred while removing the word ${successful}`)
+    await bot.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
   }
 })
 
