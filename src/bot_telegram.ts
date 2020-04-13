@@ -114,7 +114,7 @@ bot.on("message", async msg => {
     return
   }
 
-  if (translationData.isCorrectLang) {
+  if (!translationData.isCorrectLang) {
     const permitted = await core.shouldBePermitted(msg.text)
 
     if (!permitted) {
