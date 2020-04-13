@@ -13,7 +13,7 @@ import * as translate from "translation-google"
 import { CoreConfig } from "./types_core"
 import * as languagesFile from "./languages.json"
 
-export const config: CoreConfig = new CoreConfig()
+export const config = new CoreConfig()
 
 admin.initializeApp({
   credential: admin.credential.cert({

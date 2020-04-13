@@ -4,17 +4,17 @@
 
 import * as TelegramBot from "node-telegram-bot-api"
 import * as core from "./core"
+import { TelegramConfig } from "./types_telegram"
 
 const config = core.config
-
-if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+const telegramConfig = new TelegramConfig()
 
 console.log()
 console.log(
   `Bot is running. Some settings are:\nREQUIRED_LANG: ${config.REQUIRED_LANG}, BE_HEPLFUL: ${config.BE_HELPFUL}, MUTE_PEOPLE: ${config.MUTE_PEOPLE}, BAN_TIMEOUT: ${config.BAN_TIMEOUT}`
 )
 
-const bot = new TelegramBot(config.TOKEN, { polling: true })
+const bot = new TelegramBot(telegramConfig.TOKEN, { polling: true })
 
 /**
  * Returns true if the user is an admin or a creator, false otherwise.
