@@ -21,7 +21,7 @@ function isAdminUser(chatMember: TelegramBot.ChatMember): boolean {
 // Handles adding messages from the database
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from?.id.toString()
+  const userId = msg.from.id.toString()
 
   if (!match) {
     console.log("match is undefined. Returned.")
@@ -52,7 +52,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
   if (successful) {
     await bot.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
   } else {
-    await bot.sendMessage(chatId, `An error occurred while adding the word ${successful}`)
+    await bot.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
   }
 })
 
