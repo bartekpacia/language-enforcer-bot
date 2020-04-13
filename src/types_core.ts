@@ -82,13 +82,13 @@ export class TranslationContext {
 
   requiredLangName: string
 
-  translation: Translation
+  translation: Translation | null
 
   constructor(
     isCorrectLang: boolean,
     requiredLangCode: string,
     requiredLangName: string,
-    translation: Translation
+    translation: Translation | null
   ) {
     this.isCorrectLang = isCorrectLang
     this.requiredLangCode = requiredLangCode

@@ -12,6 +12,10 @@ export async function translateAndCheck(
   const requiredLangCode = config.REQUIRED_LANG
   const requiredLangName = findLangName(requiredLangCode)
 
+  if (!translation) {
+    return new TranslationContext(true, requiredLangCode, requiredLangName, null)
+  }
+
   let isCorrectLang = translation.detectedLangCode === requiredLangCode
 
   if (translation.detectedLangCode === "und") {
@@ -31,12 +35,12 @@ export async function translateAndCheck(
   return new TranslationContext(isCorrectLang, requiredLangCode, requiredLangName, translation)
 }
 
-async function translate(text: string, config: CoreConfig): Promise<Translation> {
+async function translate(text: string, config: CoreConfig): Promise<Translation | null> {
   let translation = await translatePoor(text, config)
   // console.log("Attempted to use POOR translation method.")
   // console.log(translation)
 
-  if (!translation) {
+  if (!translation && config.GCP_API_KEY) {
     translation = await translateRich(text, config)
 
     // console.log("POOR translation failed. Attempted to use RICH translation method.")
