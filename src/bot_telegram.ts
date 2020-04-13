@@ -90,7 +90,7 @@ bot.onText(/\/remove (.+)/, async (msg, match) => {
   if (successful) {
     await bot.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
   } else {
-    await bot.sendMessage(chatId, `An error occurred while removing the word ${successful}`)
+    await bot.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
   }
 })
 
