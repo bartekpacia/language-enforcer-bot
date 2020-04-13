@@ -19,8 +19,9 @@
   "rules": {
     "no-console": "off",
     "no-restricted-syntax": "off",
-    "import/first": "off",
+    "max-classes-per-file": "off",
     "prefer-destructuring": ["error", { "array": false }],
+    "import/first": "off",
     "import/extensions": [
       "error",
       "ignorePackages",
