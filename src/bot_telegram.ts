@@ -9,11 +9,6 @@ import { TelegramConfig } from "./types_telegram"
 const config = core.config
 const telegramConfig = new TelegramConfig()
 
-console.log()
-console.log(
-  `Bot is running. Some settings are:\nREQUIRED_LANG: ${config.REQUIRED_LANG}, BE_HEPLFUL: ${config.BE_HELPFUL}, MUTE_PEOPLE: ${config.MUTE_PEOPLE}, BAN_TIMEOUT: ${config.BAN_TIMEOUT}`
-)
-
 const bot = new TelegramBot(telegramConfig.TOKEN, { polling: true })
 
 /**
@@ -122,7 +117,7 @@ async function performAction(
 
   if (config.MUTE_PEOPLE && !isAdminUser(chatMember)) {
     await mute(msg, chatMember)
-    message += `You've been muted for ${config.BAN_TIMEOUT / 1000} seconds.\n`
+    message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
   }
 
   if (config.BE_HELPFUL) {
@@ -157,7 +152,7 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
       can_add_web_page_previews: false
     })
 
-    console.log(`Muting user ${sender.user.first_name} for ${config.BAN_TIMEOUT / 1000} seconds.`)
+    console.log(`Muting user ${sender.user.first_name} for ${config.MUTE_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
       await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
@@ -168,6 +163,6 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
       })
 
       console.log(`Unmuted user ${sender.user.first_name}.`)
-    }, config.BAN_TIMEOUT)
+    }, config.MUTE_TIMEOUT)
   }
 }

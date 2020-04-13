@@ -12,5 +12,7 @@ export class TelegramConfig {
     const TOKEN = process.env.TOKEN
 
     this.TOKEN = TOKEN
+
+    console.log(`Created TelegramConfig object. TOKEN: ${TOKEN}`)
   }
 }

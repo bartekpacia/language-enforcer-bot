@@ -31,17 +31,20 @@ admin.initializeApp({
  * 3rd string - translated text
  */
 async function checkAndTranslate(messageText: string): Promise<[boolean, string, string, string]> {
-  let data
+  let detectedLang
+  let confidence
+  let translatedText
   try {
-    data = await translate(messageText, { raw: true, to: config.REQUIRED_LANG })
-  } catch (e) {
-    console.error(e)
-    console.error("This error is not handled because it should never happen.")
-  }
+    const data = await translate(messageText, { raw: true, to: config.REQUIRED_LANG })
 
-  const detectedLang = data.from.language.iso
-  const confidence = JSON.parse(data.raw)[6]
-  const translatedText = data.text
+    detectedLang = data.from.language.iso
+    confidence = JSON.parse(data.raw)[6]
+    translatedText = data.text
+  } catch (err) {
+    console.error(err)
+    console.error("An error occurred while translating the message")
+    return [true, "error", "error", "error"] // TODO: find better way that doesn't hurt eyes
+  }
 
   console.log(
     `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${messageText}`
