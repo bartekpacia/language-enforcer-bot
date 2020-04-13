@@ -2,6 +2,8 @@
  * Configuration that is shared among all messaging frontends.
  */
 export class CoreConfig {
+  GCP_API_KEY: string
+
   REQUIRED_LANG: string
 
   PROJECT_ID: string
@@ -17,10 +19,12 @@ export class CoreConfig {
   MUTE_TIMEOUT: number
 
   constructor() {
+    if (!process.env.GCP_API_KEY) throw new Error("GCP_API_KEY is missing!")
     if (!process.env.PROJECT_ID) throw new Error("PROJECT_ID is missing!")
     if (!process.env.CLIENT_EMAIL) throw new Error("CLIENT_EMAIL is missing!")
     if (!process.env.PRIVATE_KEY) throw new Error("PRIVATE_KEY is missing!")
 
+    const GCP_API_KEY = process.env.GCP_API_KEY
     const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
     const PROJECT_ID = process.env.PROJECT_ID
     const CLIENT_EMAIL = process.env.CLIENT_EMAIL
@@ -29,6 +33,7 @@ export class CoreConfig {
     const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
     const MUTE_TIMEOUT = Number(process.env.MUTE_TIMEOUT) || 30000
 
+    this.GCP_API_KEY = GCP_API_KEY
     this.REQUIRED_LANG = REQUIRED_LANG
     this.PROJECT_ID = PROJECT_ID
     this.CLIENT_EMAIL = CLIENT_EMAIL
