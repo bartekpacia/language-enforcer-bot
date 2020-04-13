@@ -23,6 +23,16 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const userId = msg.from?.id.toString()
 
+  if (!match) {
+    console.log("match is undefined. Returned.")
+    return
+  }
+
+  if (!userId) {
+    console.log("userId is undefined. Returned.")
+    return
+  }
+
   const chatMember = await bot.getChatMember(chatId, userId)
 
   if (!isAdminUser(chatMember)) {
@@ -33,6 +43,9 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 
   // "match" is the result of executing the regexp above on the message's text
   const inputText = match[1].toLowerCase()
+  if (!inputText) {
+    console.log("inputText is undefined. Returned.")
+  }
 
   const successful = await core.addException(inputText)
 
@@ -46,20 +59,30 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
 // Handles removing messages from the database
 bot.onText(/\/remove (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from.id
+  const userId = msg.from?.id
+
+  if (!match) {
+    console.log("match is undefined. Returned.")
+    return
+  }
+
+  if (!userId) {
+    console.log("userId is undefined. Returned.")
+    return
+  }
 
   const chatMember = await bot.getChatMember(chatId, userId.toString())
 
-  if (isAdminUser(chatMember)) {
-    // okay
-  } else {
+  if (!isAdminUser(chatMember)) {
     console.log("User is not an admin. Returned.")
     await bot.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
     return
   }
 
-  // "match" is the result of executing the regexp above on the message's text
   const inputText = match[1].toLowerCase()
+  if (!inputText) {
+    console.log("inputText is undefined. Returned.")
+  }
 
   const successful = await core.removeException(inputText)
 
@@ -84,18 +107,23 @@ bot.on("message", async msg => {
     return
   }
 
-  const [
-    isCorrectLanguage,
-    detectedLangName,
-    requiredLangName,
-    translatedText
-  ] = await core.checkAndTranslate(msg.text)
+  const translationData = await core.checkAndTranslate(msg.text)
 
-  if (!isCorrectLanguage) {
+  if (!translationData) {
+    console.log("translationData is null. That's probably an error. Returned.")
+    return
+  }
+
+  if (translationData.isCorrectLang) {
     const permitted = await core.shouldBePermitted(msg.text)
 
     if (!permitted) {
-      await performAction(msg, detectedLangName, requiredLangName, translatedText)
+      await performAction(
+        msg,
+        translationData.detectedLangName,
+        translationData.requiredLangName,
+        translationData.translatedText
+      )
     }
   }
 })
@@ -110,13 +138,18 @@ async function performAction(
   requiredLangName: string,
   translatedText: string
 ): Promise<void> {
+  if (!msg.from) {
+    console.log("msg.from is undefined. Returned.")
+    return
+  }
+
   console.log(`Perfoming action on user ${msg.from.first_name}...`)
   let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
 
-  const chatMember = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
+  const sender = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
 
-  if (config.MUTE_PEOPLE && !isAdminUser(chatMember)) {
-    await mute(msg, chatMember)
+  if (config.MUTE_PEOPLE && !isAdminUser(sender)) {
+    await mute(msg, sender)
     message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
   }
 
@@ -145,7 +178,7 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
   console.log(`mute() function invoked for user ${sender.user.first_name}, isAdmin: ${isAdmin}`)
 
   if (!isAdmin) {
-    await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
+    await bot.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
       can_send_messages: false,
       can_send_media_messages: false,
       can_send_other_messages: false,
@@ -155,7 +188,7 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
     console.log(`Muting user ${sender.user.first_name} for ${config.MUTE_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
-      await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
+      await bot.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
         can_send_messages: true,
         can_send_media_messages: true,
         can_send_other_messages: true,

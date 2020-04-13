@@ -10,7 +10,7 @@ dotenv.config()
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
 import * as translate from "translation-google"
-import { CoreConfig } from "./types_core"
+import { CoreConfig, TranslationData } from "./types_core"
 import * as languagesFile from "./languages.json"
 
 export const config = new CoreConfig()
@@ -30,7 +30,7 @@ admin.initializeApp({
  * 2nd string – full name of the specified language
  * 3rd string - translated text
  */
-async function checkAndTranslate(messageText: string): Promise<[boolean, string, string, string]> {
+async function checkAndTranslate(messageText: string): Promise<TranslationData | null> {
   let detectedLang
   let confidence
   let translatedText
@@ -43,37 +43,51 @@ async function checkAndTranslate(messageText: string): Promise<[boolean, string,
   } catch (err) {
     console.error(err)
     console.error("An error occurred while translating the message")
-    return [true, "error", "error", "error"] // TODO: find better way that doesn't hurt eyes
+    return null
   }
 
   console.log(
     `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${messageText}`
   )
 
-  const detectedLangFullName = languagesFile.data.languages.find(
+  const detectedLangFullName = languagesFile.data?.languages.find(
     ({ language }) => language === detectedLang
-  ).name
+  )?.name
 
-  const requiredLangFullName = languagesFile.data.languages.find(
+  const requiredLangFullName = languagesFile.data?.languages?.find(
     ({ language }) => language === config.REQUIRED_LANG
-  ).name
+  )?.name
+
+  if (!detectedLangFullName) {
+    console.log("detectedLanfFullName is undefined.")
+    return null
+  }
+
+  if (!requiredLangFullName) {
+    console.log("requiredLangFullName is undefined.")
+    return null
+  }
+
+  let isCorrectLang = detectedLang === config.REQUIRED_LANG
 
   if (detectedLang === "und") {
-    console.log(`Couldn't detect language (detectedLang === "und"). Returning...`)
-    return [true, detectedLangFullName, requiredLangFullName, messageText]
+    console.log(
+      `Couldn't detect language (detectedLang === "und"). Assuming that isCorrectLang = true.`
+    )
+    isCorrectLang = true
   }
 
   if (confidence < 0.7) {
-    console.log(`Confidence is too small (${confidence}). Returning...`)
-    return [true, detectedLangFullName, requiredLangFullName, messageText]
+    console.log(`Confidence is too small (${confidence}). Assuming that isCorrectLang = true.`)
+    isCorrectLang = true
   }
 
-  return [
-    detectedLang === config.REQUIRED_LANG,
+  return new TranslationData(
+    isCorrectLang,
     detectedLangFullName,
     requiredLangFullName,
     translatedText
-  ]
+  )
 }
 
 /**

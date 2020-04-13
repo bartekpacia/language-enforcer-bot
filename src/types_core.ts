@@ -1,13 +1,19 @@
 /**
- * Configuration that is shared among all messaging services.
+ * Configuration that is shared among all messaging frontends.
  */
 export class CoreConfig {
   REQUIRED_LANG: string
+
   PROJECT_ID: string
+
   CLIENT_EMAIL: string
+
   PRIVATE_KEY: string
+
   BE_HELPFUL: boolean
+
   MUTE_PEOPLE: boolean
+
   MUTE_TIMEOUT: number
 
   constructor() {
@@ -35,5 +41,27 @@ export class CoreConfig {
       `Created CoreConfig object. REQUIRED_LANG: ${REQUIRED_LANG}, PROJECT_ID: ${PROJECT_ID}, CLIENT_EMAIL: ${CLIENT_EMAIL}, PRIVATE_KEY: (${PRIVATE_KEY !=
         null}), BE_HELPFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, MUTE_TIMEOUT: ${MUTE_TIMEOUT}`
     )
+  }
+}
+
+export class TranslationData {
+  isCorrectLang: boolean
+
+  detectedLangName: string
+
+  requiredLangName: string
+
+  translatedText: string
+
+  constructor(
+    isCorrectLang: boolean,
+    detectedLangName: string,
+    requiredLangName: string,
+    translatedText: string
+  ) {
+    this.isCorrectLang = isCorrectLang
+    this.detectedLangName = detectedLangName
+    this.requiredLangName = requiredLangName
+    this.translatedText = translatedText
   }
 }
