@@ -10,7 +10,7 @@ dotenv.config()
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
 import * as translate from "translation-google"
-import { CoreConfig, TranslationData } from "./types_core"
+import { CoreConfig, TranslationContext } from "./types_core"
 import * as languagesFile from "./languages.json"
 
 export const config = new CoreConfig()
@@ -27,7 +27,7 @@ admin.initializeApp({
  * Translates the @param messageText and checks whether it is in the required language.
  * @return TranslationData object or null
  */
-async function translateAndCheck(messageText: string): Promise<TranslationData | null> {
+async function translateAndCheck(messageText: string): Promise<TranslationContext | null> {
   let detectedLang
   let confidence
   let translatedText
@@ -79,7 +79,7 @@ async function translateAndCheck(messageText: string): Promise<TranslationData |
     isCorrectLang = true
   }
 
-  return new TranslationData(
+  return new TranslationContext(
     isCorrectLang,
     detectedLangFullName,
     requiredLangFullName,

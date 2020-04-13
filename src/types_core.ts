@@ -49,24 +49,50 @@ export class CoreConfig {
   }
 }
 
-export class TranslationData {
-  isCorrectLang: boolean
+export class Translation {
+  inputText: string
+
+  detectedLangCode: string
 
   detectedLangName: string
 
+  translatedText: string
+
+  confidence: number
+
+  constructor(
+    inputText: string,
+    detectedLangCode: string,
+    detectedLangName: string,
+    translatedText: string,
+    confidence: number
+  ) {
+    this.inputText = inputText
+    this.detectedLangCode = detectedLangCode
+    this.detectedLangName = detectedLangName
+    this.translatedText = translatedText
+    this.confidence = confidence
+  }
+}
+
+export class TranslationContext {
+  isCorrectLang: boolean
+
+  requiredLangCode: string
+
   requiredLangName: string
 
-  translatedText: string
+  translation: Translation
 
   constructor(
     isCorrectLang: boolean,
-    detectedLangName: string,
+    requiredLangCode: string,
     requiredLangName: string,
-    translatedText: string
+    translation: Translation
   ) {
     this.isCorrectLang = isCorrectLang
-    this.detectedLangName = detectedLangName
+    this.requiredLangCode = requiredLangCode
     this.requiredLangName = requiredLangName
-    this.translatedText = translatedText
+    this.translation = translation
   }
 }
