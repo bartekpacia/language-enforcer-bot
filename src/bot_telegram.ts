@@ -21,7 +21,7 @@ function isAdminUser(chatMember: TelegramBot.ChatMember): boolean {
 // Handles adding messages from the database
 bot.onText(/\/except (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
-  const userId = msg.from.id.toString()
+  const userId = msg.from?.id
 
   if (!match) {
     console.log("match is undefined. Returned.")
@@ -33,7 +33,7 @@ bot.onText(/\/except (.+)/, async (msg, match) => {
     return
   }
 
-  const chatMember = await bot.getChatMember(chatId, userId)
+  const chatMember = await bot.getChatMember(chatId, userId.toString())
 
   if (!isAdminUser(chatMember)) {
     console.log("User is not an admin. Returned.")
