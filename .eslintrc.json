@@ -33,7 +33,11 @@
     ],
     "import/newline-after-import": "off",
     "@typescript-eslint/no-use-before-define": "off",
-    "@typescript-eslint/camelcase": ["error", { "properties": "never" }]
+    "@typescript-eslint/camelcase": ["error", { "properties": "never" }],
+    "@typescript-eslint/interface-name-prefix": [
+      "error",
+      { "properties": { "prefixWithI": "always" } }
+    ]
   },
 
   // Needed for eslint-plugin-import to correctly detect .ts files

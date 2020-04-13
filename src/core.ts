@@ -10,17 +10,18 @@ dotenv.config()
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
 import * as translate from "translation-google"
+import { CoreConfig } from "./types_core"
 import * as languagesFile from "./languages.json"
+
+export const config: CoreConfig = new CoreConfig()
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    projectId: process.env.PROJECT_ID,
-    clientEmail: process.env.CLIENT_EMAIL,
-    privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, "\n")
+    projectId: config.PROJECT_ID,
+    clientEmail: config.CLIENT_EMAIL,
+    privateKey: config.PRIVATE_KEY
   })
 })
-
-const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
 
 /**
  * @return Tuple of boolean, string, string and string.
@@ -32,7 +33,7 @@ const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
 async function checkAndTranslate(messageText: string): Promise<[boolean, string, string, string]> {
   let data
   try {
-    data = await translate(messageText, { raw: true, to: REQUIRED_LANG })
+    data = await translate(messageText, { raw: true, to: config.REQUIRED_LANG })
   } catch (e) {
     console.error(e)
     console.error("This error is not handled because it should never happen.")
@@ -51,7 +52,7 @@ async function checkAndTranslate(messageText: string): Promise<[boolean, string,
   ).name
 
   const requiredLangFullName = languagesFile.data.languages.find(
-    ({ language }) => language === REQUIRED_LANG
+    ({ language }) => language === config.REQUIRED_LANG
   ).name
 
   if (detectedLang === "und") {
@@ -65,7 +66,7 @@ async function checkAndTranslate(messageText: string): Promise<[boolean, string,
   }
 
   return [
-    detectedLang === REQUIRED_LANG,
+    detectedLang === config.REQUIRED_LANG,
     detectedLangFullName,
     requiredLangFullName,
     translatedText

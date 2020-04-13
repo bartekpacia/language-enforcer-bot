@@ -2,26 +2,19 @@
  * Telegram Bot. It takes advantage of the functions defined in core.ts.
  */
 
-import * as dotenv from "dotenv"
-dotenv.config()
-
 import * as TelegramBot from "node-telegram-bot-api"
 import * as core from "./core"
 
-if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+const config = core.config
 
-const { TOKEN } = process.env
-const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
-const BE_HELPFUL = process.env.BE_HELPFUL === "true"
-const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
-const BAN_TIMEOUT = Number(process.env.BAN_TIMEOUT) || 30000
+if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
 
 console.log()
 console.log(
-  `Bot is running. Some settings are:\nREQUIRED_LANG: ${REQUIRED_LANG}, BE_HEPLFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, BAN_TIMEOUT: ${BAN_TIMEOUT}`
+  `Bot is running. Some settings are:\nREQUIRED_LANG: ${config.REQUIRED_LANG}, BE_HEPLFUL: ${config.BE_HELPFUL}, MUTE_PEOPLE: ${config.MUTE_PEOPLE}, BAN_TIMEOUT: ${config.BAN_TIMEOUT}`
 )
 
-const bot = new TelegramBot(TOKEN, { polling: true })
+const bot = new TelegramBot(config.TOKEN, { polling: true })
 
 /**
  * Returns true if the user is an admin or a creator, false otherwise.
@@ -127,12 +120,12 @@ async function performAction(
 
   const chatMember = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
 
-  if (MUTE_PEOPLE && !isAdminUser(chatMember)) {
+  if (config.MUTE_PEOPLE && !isAdminUser(chatMember)) {
     await mute(msg, chatMember)
-    message += `You've been muted for ${BAN_TIMEOUT / 1000} seconds.\n`
+    message += `You've been muted for ${config.BAN_TIMEOUT / 1000} seconds.\n`
   }
 
-  if (BE_HELPFUL) {
+  if (config.BE_HELPFUL) {
     if (translatedText !== msg.text) {
       message += `BTW, they tried to say "${translatedText}"`
     } else {
@@ -164,7 +157,7 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
       can_add_web_page_previews: false
     })
 
-    console.log(`Muting user ${sender.user.first_name} for ${BAN_TIMEOUT / 1000} seconds.`)
+    console.log(`Muting user ${sender.user.first_name} for ${config.BAN_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
       await bot.restrictChatMember(msg.chat.id, msg.from.id.toString(), {
@@ -175,6 +168,6 @@ async function mute(msg: TelegramBot.Message, sender: TelegramBot.ChatMember): P
       })
 
       console.log(`Unmuted user ${sender.user.first_name}.`)
-    }, BAN_TIMEOUT)
+    }, config.BAN_TIMEOUT)
   }
 }
