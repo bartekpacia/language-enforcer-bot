@@ -1,5 +1,3 @@
-import { CoreConfig } from "./types_core"
-
 /**
  * Discord-specific configuration.
  */
@@ -13,6 +11,6 @@ export class DiscordConfig {
 
     this.TOKEN = TOKEN
 
-    console.log(`Created DiscordConfig object. TOKEN: ${TOKEN}`)
+    // console.log(`Created DiscordConfig object. TOKEN: ${TOKEN}`)
   }
 }

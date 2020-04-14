@@ -9,9 +9,8 @@ dotenv.config()
 
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
-import * as translate from "translation-google"
-import { CoreConfig, TranslationData } from "./types_core"
-import * as languagesFile from "./languages.json"
+import { CoreConfig, TranslationContext } from "./types_core"
+import * as translator from "./translator"
 
 export const config = new CoreConfig()
 
@@ -24,70 +23,13 @@ admin.initializeApp({
 })
 
 /**
- * @return Tuple of boolean, string, string and string.
- * boolean – true if the language is the specified language, false otherwise
- * 1st string – full name of the detected language
- * 2nd string – full name of the specified language
- * 3rd string - translated text
+ * Translates the @param messageText and checks whether it is in the required language.
+ * @return TranslationData object or null
  */
-async function checkAndTranslate(messageText: string): Promise<TranslationData | null> {
-  let detectedLang
-  let confidence
-  let translatedText
-  try {
-    const data = await translate(messageText, { raw: true, to: config.REQUIRED_LANG })
+async function translateAndCheck(messageText: string): Promise<TranslationContext> {
+  const translationContext = await translator.translateAndCheck(messageText, config)
 
-    detectedLang = data.from.language.iso
-    confidence = JSON.parse(data.raw)[6]
-    translatedText = data.text
-  } catch (err) {
-    console.error(err)
-    console.error("An error occurred while translating the message")
-    return null
-  }
-
-  console.log(
-    `Lang: ${detectedLang}, confidence: ${confidence.toPrecision(3)}, message: ${messageText}`
-  )
-
-  const detectedLangFullName = languagesFile.data?.languages.find(
-    ({ language }) => language === detectedLang
-  )?.name
-
-  const requiredLangFullName = languagesFile.data?.languages?.find(
-    ({ language }) => language === config.REQUIRED_LANG
-  )?.name
-
-  if (!detectedLangFullName) {
-    console.log("detectedLanfFullName is undefined.")
-    return null
-  }
-
-  if (!requiredLangFullName) {
-    console.log("requiredLangFullName is undefined.")
-    return null
-  }
-
-  let isCorrectLang = detectedLang === config.REQUIRED_LANG
-
-  if (detectedLang === "und") {
-    console.log(
-      `Couldn't detect language (detectedLang === "und"). Assuming that isCorrectLang = true.`
-    )
-    isCorrectLang = true
-  }
-
-  if (confidence < 0.7) {
-    console.log(`Confidence is too small (${confidence}). Assuming that isCorrectLang = true.`)
-    isCorrectLang = true
-  }
-
-  return new TranslationData(
-    isCorrectLang,
-    detectedLangFullName,
-    requiredLangFullName,
-    translatedText
-  )
+  return translationContext
 }
 
 /**
@@ -203,4 +145,4 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   return false
 }
 
-export { checkAndTranslate, shouldBePermitted, addException, removeException }
+export { translateAndCheck, shouldBePermitted, addException, removeException }
