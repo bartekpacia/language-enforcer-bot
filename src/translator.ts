@@ -56,7 +56,8 @@ async function translate(text: string, config: CoreConfig): Promise<Translation 
  * Works always but the poor owner has to pay for it.
  */
 async function translateRich(text: string, config: CoreConfig): Promise<Translation> {
-  const options = {
+  // Part 1 – detect languae
+  const detectRequestOptions = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${config.GCP_API_KEY}`,
     method: "POST",
     json: true,
@@ -65,22 +66,43 @@ async function translateRich(text: string, config: CoreConfig): Promise<Translat
     }
   }
 
-  let data
+  let detectData
   try {
-    const response = await request(options)
-    data = response.data
+    const response = await request(detectRequestOptions)
+    detectData = response.data
   } catch (err) {
+    console.error("An error occurred while using Google Translate API to detect a language.")
     console.error(err.message)
     process.exit(69)
   }
 
-  // console.log(JSON.stringify(data)) // uncomment to print whole response
-
-  const detectedLangCode = data.detections[0][0].language
-  const confidence = data.detections[0][0].confidence
-  const translatedText = data.text
+  const detectedLangCode = detectData.detections[0][0].language
+  const confidence = detectData.detections[0][0].confidence
 
   const detectedLangName = findLangName(detectedLangCode)
+
+  // Part 2 – translate to target language
+  const translateRequestOptions = {
+    uri: `https://translation.googleapis.com/language/translate/v2?key=${config.GCP_API_KEY}`,
+    method: "POST",
+    json: true,
+    body: {
+      q: text,
+      target: config.REQUIRED_LANG
+    }
+  }
+
+  let translateData
+  try {
+    const response = await request(translateRequestOptions)
+    translateData = response.data
+  } catch (err) {
+    console.error("An error occurred while using Google Translate API to translate a message.")
+    console.error(err.message)
+    process.exit(69)
+  }
+
+  const translatedText = translateData.translations[0].translatedText
 
   return new Translation(text, detectedLangCode, detectedLangName, translatedText, confidence)
 }
@@ -100,8 +122,9 @@ async function translatePoor(text: string, config: CoreConfig): Promise<Translat
 
     return new Translation(text, detectedLangCode, detectedLangName, translatedText, confidence)
   } catch (err) {
-    console.error(err)
-    console.error("An error occurred while translating the message")
+    console.error("An error occurred while translating the message using POOR method.")
+    console.log("This usually happens because of HTTP 429 Too Many Requests.")
+    console.log("The bot should now fallback to the RICH method.")
     return null
   }
 }

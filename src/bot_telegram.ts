@@ -143,7 +143,7 @@ async function performAction(
     return
   }
 
-  console.log(`Perfoming action on user ${msg.from.first_name}...`)
+  console.log(`Performing rebuke/mute/translate action on user ${msg.from.first_name}.`)
   let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
 
   const sender = await bot.getChatMember(msg.chat.id, msg.from.id.toString())
