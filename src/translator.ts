@@ -3,6 +3,12 @@ import * as freeTranslationGoogle from "translation-google"
 import { Translation, TranslationContext, CoreConfig } from "./types_core"
 import * as languagesFile from "./languages.json"
 
+/**
+ * Detects the language of the @param text, translates it to REQUIRED_LANG and
+ * returns whether the detected language is correct.
+ * @param text Text to be translated and checked against
+ * @param config CoreConfig configuration object
+ */
 export async function translateAndCheck(
   text: string,
   config: CoreConfig
@@ -18,9 +24,9 @@ export async function translateAndCheck(
 
   let isCorrectLang = translation.detectedLangCode === requiredLangCode
 
-  if (translation.detectedLangCode === "und") {
+  if (translation.detectedLangCode === "und" || requiredLangName === "unknown") {
     console.log(
-      `Couldn't detect language (detectedLang === "und"). Assuming that isCorrectLang = true.`
+      `Couldn't detect language (detectedLang === "und" || "unknown"). Assuming that isCorrectLang = true.`
     )
     isCorrectLang = true
   }
@@ -130,9 +136,7 @@ async function translatePoor(text: string, config: CoreConfig): Promise<Translat
 }
 
 function findLangName(langIsoCode: string): string | "unknown" {
-  const langFullName = languagesFile.data?.languages?.find(
-    ({ language }) => language === langIsoCode
-  )?.name
+  const langFullName = languagesFile[langIsoCode]
 
   if (!langFullName) {
     return "unknown"
