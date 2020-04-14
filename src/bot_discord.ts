@@ -21,9 +21,9 @@ function isAdminUser(guildMember: DiscordBot.GuildMember): boolean {
 }
 
 /**
-* Handles adding words to the exception list
-*/
-async function handleExcept(msg: DiscordBot.Message, match) {
+ * Handles adding words to the exception list
+ */
+async function handleExcept(msg: DiscordBot.Message, match): Promise<void> {
   if (!msg.member || !isAdminUser(msg.member)) {
     console.log("User is not an admin or has left the server. Returned.")
     msg.reply("Sorry, this is a admin-only feature.")
@@ -42,9 +42,9 @@ async function handleExcept(msg: DiscordBot.Message, match) {
 }
 
 /**
-* Handles removing words from the exception list
-*/
-async function handleRemove(msg: DiscordBot.Message, match) {
+ * Handles removing words from the exception list
+ */
+async function handleRemove(msg: DiscordBot.Message, match): Promise<void> {
   if (!msg.member || !isAdminUser(msg.member)) {
     console.log("User is not an admin or has left the server. Returned.")
     msg.reply("Sorry, this is a admin-only feature.")
@@ -62,17 +62,8 @@ async function handleRemove(msg: DiscordBot.Message, match) {
   }
 }
 
-bot.on("ready", () => {
-  if (!config.MUTE_PEOPLE) {
-    return
-  }
-
-
-})
-
 // Handles all messages and checks whether they're in the specified language
 bot.on("message", async msg => {
-
   if (msg.author === bot.user) {
     // prevents reacting to own messages
     return
@@ -84,7 +75,9 @@ bot.on("message", async msg => {
   }
 
   if (msg.channel instanceof DiscordBot.DMChannel) {
-    console.log("Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)")
+    console.log(
+      "Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)"
+    )
     msg.reply("Sorry, I work only in servers.")
     return
   }
@@ -143,7 +136,6 @@ async function performAction(
   }
 
   if (config.BE_HELPFUL) {
-
     if (translatedText !== msg.content) {
       message += `BTW, they tried to say "${translatedText}"`
     } else {
@@ -163,7 +155,9 @@ async function mute(msg: DiscordBot.Message): Promise<void> {
   console.log(`mute() function invoked for user ${msg.author.username}`)
 
   if (!msg.guild) {
-    console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
+    console.error(
+      "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
+    )
     return
   }
 
@@ -173,18 +167,24 @@ async function mute(msg: DiscordBot.Message): Promise<void> {
       return
     }
 
-    await channel.overwritePermissions([{
-      id: msg.member,
-      deny: "SEND_MESSAGES"
-    }], "Spoke wrong language")
-
+    await channel.overwritePermissions(
+      [
+        {
+          id: msg.member,
+          deny: "SEND_MESSAGES"
+        }
+      ],
+      "Spoke wrong language"
+    )
   })
 
   console.log(`Muting user ${msg.author.username} for ${config.MUTE_TIMEOUT / 1000} seconds.`)
 
   setTimeout(async () => {
     if (!msg.guild) {
-      console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
+      console.error(
+        "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
+      )
       return
     }
 
@@ -194,10 +194,15 @@ async function mute(msg: DiscordBot.Message): Promise<void> {
         return
       }
 
-      await channel.overwritePermissions([{
-        id: msg.member,
-        allow: "SEND_MESSAGES"
-      }], "Spoke wrong language - Timeout over")
+      await channel.overwritePermissions(
+        [
+          {
+            id: msg.member,
+            allow: "SEND_MESSAGES"
+          }
+        ],
+        "Spoke wrong language - Timeout over"
+      )
     })
     console.log(`Unmuted user ${msg.author.username}.`)
   }, config.MUTE_TIMEOUT)
