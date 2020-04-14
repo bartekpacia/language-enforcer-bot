@@ -24,6 +24,7 @@ export async function translateAndCheck(
 
   let isCorrectLang = translation.detectedLangCode === requiredLangCode
 
+  // Handle edge cases (when no language is detected)
   if (translation.detectedLangCode === "und" || requiredLangName === "unknown") {
     console.log(
       `Couldn't detect language (detectedLang === "und" || "unknown"). Assuming that isCorrectLang = true.`
@@ -31,27 +32,19 @@ export async function translateAndCheck(
     isCorrectLang = true
   }
 
+  // Relax when the confidence isn't big enough
   if (translation.confidence < 0.7) {
-    console.log(
-      `Confidence is too small (${translation.confidence}). Assuming that isCorrectLang = true.`
-    )
     isCorrectLang = true
   }
 
   return new TranslationContext(isCorrectLang, requiredLangCode, requiredLangName, translation)
 }
 
-async function translate(text: string, config: CoreConfig): Promise<Translation | null> {
+export async function translate(text: string, config: CoreConfig): Promise<Translation | null> {
   let translation = await translatePoor(text, config)
-  // console.log("Attempted to use POOR translation method.")
-  // console.log(translation)
 
   if (!translation && config.GCP_API_KEY) {
     translation = await translateRich(text, config)
-
-    // console.log("POOR translation failed. Attempted to use RICH translation method.")
-    // console.log(translation)
-
     return translation
   }
 
@@ -61,7 +54,7 @@ async function translate(text: string, config: CoreConfig): Promise<Translation 
 /**
  * Works always but the poor owner has to pay for it.
  */
-async function translateRich(text: string, config: CoreConfig): Promise<Translation> {
+export async function translateRich(text: string, config: CoreConfig): Promise<Translation> {
   // Part 1 – detect languae
   const detectRequestOptions = {
     uri: `https://translation.googleapis.com/language/translate/v2/detect?key=${config.GCP_API_KEY}`,
@@ -128,9 +121,9 @@ async function translatePoor(text: string, config: CoreConfig): Promise<Translat
 
     return new Translation(text, detectedLangCode, detectedLangName, translatedText, confidence)
   } catch (err) {
-    console.error("An error occurred while translating the message using POOR method.")
-    console.log("This usually happens because of HTTP 429 Too Many Requests.")
-    console.log("The bot should now fallback to the RICH method.")
+    console.log(
+      "Couldn't translate the message using POOR method. The bot should now fallback to the RICH method"
+    )
     return null
   }
 }

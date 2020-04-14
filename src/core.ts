@@ -145,4 +145,4 @@ async function shouldBePermitted(messageText: string): Promise<boolean> {
   return false
 }
 
-export { translateAndCheck as checkAndTranslate, shouldBePermitted, addException, removeException }
+export { translateAndCheck, shouldBePermitted, addException, removeException }

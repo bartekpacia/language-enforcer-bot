@@ -107,7 +107,7 @@ bot.on("message", async msg => {
     return
   }
 
-  const translationContext = await core.checkAndTranslate(msg.text)
+  const translationContext = await core.translateAndCheck(msg.text)
 
   if (!translationContext) {
     console.log("translationData is null. That's probably an error. Returned.")
