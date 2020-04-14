@@ -2,7 +2,7 @@
 
 Toolkit and Telegram/Discord Bot to enforce one language in the _group_ chat. How does it do it?
 
-If LangPolizei detects that the language doesn't match the one specified in `.env` file, ~~it mutes the user for 45 seconds~~ it rebukes the user.
+If LangPolizei detects that the language doesn't match the one specified in `.env` file, it rebukes and/or mutes the user for the specified period of time.
 
 ## Usage
 
@@ -29,6 +29,7 @@ Do `git clone` and `npm install`. You'll also need to set a few environment vari
 
 `TELEGRAM_TOKEN` - [Telegram Bot API key](https://core.telegram.org/bots/api#authorizing-your-bot)
 and/or
+
 `DISCORD_TOKEN` - [Discord Bot API key](https://discordapp.com/developers/docs/topics/oauth2)
 
 `GCP_API_KEY` - API key to the [Google Translate API](https://console.cloud.google.com/apis/api/translate.googleapis.com/overview). Enable this API and use it (it always starts with "Alza")
