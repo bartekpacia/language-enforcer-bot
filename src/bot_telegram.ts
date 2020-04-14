@@ -107,22 +107,22 @@ bot.on("message", async msg => {
     return
   }
 
-  const translationData = await core.checkAndTranslate(msg.text)
+  const translationContext = await core.translateAndCheck(msg.text)
 
-  if (!translationData) {
+  if (!translationContext) {
     console.log("translationData is null. That's probably an error. Returned.")
     return
   }
 
-  if (!translationData.isCorrectLang) {
+  if (!translationContext.isCorrectLang) {
     const permitted = await core.shouldBePermitted(msg.text)
 
-    if (!permitted) {
+    if (!permitted && translationContext.translation) {
       await performAction(
         msg,
-        translationData.detectedLangName,
-        translationData.requiredLangName,
-        translationData.translatedText
+        translationContext.translation.detectedLangName,
+        translationContext.requiredLangName,
+        translationContext.translation.translatedText
       )
     }
   }
@@ -143,7 +143,7 @@ async function performAction(
     return
   }
 
-  console.log(`Perfoming action on user ${msg.from.first_name}...`)
+  console.log(`Performing rebuke/mute/translate action on user ${msg.from.first_name}.`)
   let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
 
   const sender = await bot.getChatMember(msg.chat.id, msg.from.id.toString())

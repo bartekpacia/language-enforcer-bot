@@ -14,12 +14,14 @@
   "plugins": ["@typescript-eslint", "prettier", "promise", "import"],
   "env": {
     "node": true,
-    "es6": true
+    "es6": true,
+    "mocha": true
   },
   "rules": {
     "no-console": "off",
     "no-restricted-syntax": "off",
     "max-classes-per-file": "off",
+    "import/prefer-default-export": "off",
     "prefer-destructuring": ["error", { "array": false }],
     "import/first": "off",
     "import/extensions": [
