@@ -19,12 +19,11 @@ export class CoreConfig {
   MUTE_TIMEOUT: number
 
   constructor() {
-    if (!process.env.GCP_API_KEY) throw new Error("GCP_API_KEY is missing!")
     if (!process.env.PROJECT_ID) throw new Error("PROJECT_ID is missing!")
     if (!process.env.CLIENT_EMAIL) throw new Error("CLIENT_EMAIL is missing!")
     if (!process.env.PRIVATE_KEY) throw new Error("PRIVATE_KEY is missing!")
 
-    const GCP_API_KEY = process.env.GCP_API_KEY
+    const GCP_API_KEY = process.env.GCP_API_KEY || "empty" // TODO: Discuss whether it's required
     const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
     const PROJECT_ID = process.env.PROJECT_ID
     const CLIENT_EMAIL = process.env.CLIENT_EMAIL
