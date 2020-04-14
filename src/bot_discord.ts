@@ -98,22 +98,22 @@ bot.on("message", async msg => {
     handleRemove(msg, removeMatch)
   }
 
-  const translationData = await core.checkAndTranslate(msg.content)
+  const translationContext = await core.translateAndCheck(msg.content)
 
-  if (!translationData) {
-    console.log("translationData is null. That's probably an error. Returned.")
+  if (!translationContext) {
+    console.log("translationContext is null. That's probably an error. Returned.")
     return
   }
 
-  if (!translationData.isCorrectLang) {
+  if (!translationContext.isCorrectLang) {
     const permitted = await core.shouldBePermitted(msg.content)
 
-    if (!permitted) {
+    if (!permitted && translationContext.translation) {
       performAction(
         msg,
-        translationData.detectedLangName,
-        translationData.requiredLangName,
-        translationData.translatedText
+        translationContext.translation.detectedLangName,
+        translationContext.requiredLangName,
+        translationContext.translation.translatedText
       )
     }
   }
@@ -134,7 +134,7 @@ async function performAction(
     return
   }
 
-  console.log(`Perfoming action on user ${msg.author.username}...`)
+  console.log(`Performing rebuke/mute/translate action on user ${msg.author.username}...`)
   let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
 
   if (config.MUTE_PEOPLE && !isAdminUser(msg.member)) {

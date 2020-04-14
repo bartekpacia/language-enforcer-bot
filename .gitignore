@@ -85,5 +85,9 @@ serviceAccountKey.json
 # generated files
 lib/
 
+# file where fun happens
+fun.js
+fun.ts
+
 # js binaries
 *.js

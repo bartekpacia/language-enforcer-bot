@@ -2,6 +2,8 @@
  * Configuration that is shared among all messaging frontends.
  */
 export class CoreConfig {
+  GCP_API_KEY: string
+
   REQUIRED_LANG: string
 
   PROJECT_ID: string
@@ -21,6 +23,7 @@ export class CoreConfig {
     if (!process.env.CLIENT_EMAIL) throw new Error("CLIENT_EMAIL is missing!")
     if (!process.env.PRIVATE_KEY) throw new Error("PRIVATE_KEY is missing!")
 
+    const GCP_API_KEY = process.env.GCP_API_KEY || "empty" // TODO: Discuss whether it's required
     const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
     const PROJECT_ID = process.env.PROJECT_ID
     const CLIENT_EMAIL = process.env.CLIENT_EMAIL
@@ -29,6 +32,7 @@ export class CoreConfig {
     const MUTE_PEOPLE = process.env.MUTE_PEOPLE === "true"
     const MUTE_TIMEOUT = Number(process.env.MUTE_TIMEOUT) || 30000
 
+    this.GCP_API_KEY = GCP_API_KEY
     this.REQUIRED_LANG = REQUIRED_LANG
     this.PROJECT_ID = PROJECT_ID
     this.CLIENT_EMAIL = CLIENT_EMAIL
@@ -37,31 +41,57 @@ export class CoreConfig {
     this.MUTE_PEOPLE = MUTE_PEOPLE
     this.MUTE_TIMEOUT = MUTE_TIMEOUT
 
-    console.log(
+    /* console.log(
       `Created CoreConfig object. REQUIRED_LANG: ${REQUIRED_LANG}, PROJECT_ID: ${PROJECT_ID}, CLIENT_EMAIL: ${CLIENT_EMAIL}, PRIVATE_KEY: (${PRIVATE_KEY !=
         null}), BE_HELPFUL: ${BE_HELPFUL}, MUTE_PEOPLE: ${MUTE_PEOPLE}, MUTE_TIMEOUT: ${MUTE_TIMEOUT}`
-    )
+    ) */
   }
 }
 
-export class TranslationData {
-  isCorrectLang: boolean
+export class Translation {
+  inputText: string
+
+  detectedLangCode: string
 
   detectedLangName: string
 
+  translatedText: string
+
+  confidence: number
+
+  constructor(
+    inputText: string,
+    detectedLangCode: string,
+    detectedLangName: string,
+    translatedText: string,
+    confidence: number
+  ) {
+    this.inputText = inputText
+    this.detectedLangCode = detectedLangCode
+    this.detectedLangName = detectedLangName
+    this.translatedText = translatedText
+    this.confidence = confidence
+  }
+}
+
+export class TranslationContext {
+  isCorrectLang: boolean
+
+  requiredLangCode: string
+
   requiredLangName: string
 
-  translatedText: string
+  translation: Translation | null
 
   constructor(
     isCorrectLang: boolean,
-    detectedLangName: string,
+    requiredLangCode: string,
     requiredLangName: string,
-    translatedText: string
+    translation: Translation | null
   ) {
     this.isCorrectLang = isCorrectLang
-    this.detectedLangName = detectedLangName
+    this.requiredLangCode = requiredLangCode
     this.requiredLangName = requiredLangName
-    this.translatedText = translatedText
+    this.translation = translation
   }
 }

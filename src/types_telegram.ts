@@ -1,5 +1,3 @@
-import { CoreConfig } from "./types_core"
-
 /**
  * Telegram-specific configuration.
  */
@@ -13,6 +11,6 @@ export class TelegramConfig {
 
     this.TOKEN = TOKEN
 
-    console.log(`Created TelegramConfig object. TOKEN: ${TOKEN}`)
+    // console.log(`Created TelegramConfig object. TOKEN: ${TOKEN}`)
   }
 }
