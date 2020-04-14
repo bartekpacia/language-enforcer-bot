@@ -5,7 +5,7 @@
     "url": "https://github.com/bartekpacia/telegram-lang-enforcer"
   },
   "version": "1.0.0",
-  "description": "Simple Telegram bot enforcing English language in groups.",
+  "description": "Simple multi-platform bot enforcing a specific language in groups.",
   "author": "Bartek Pacia",
   "license": "MIT",
   "keywords": [
@@ -16,10 +16,13 @@
     "lint": "./node_modules/.bin/eslint --ext js,ts src",
     "build": "tsc",
     "gcp-build": "npm run build",
-    "start": "node lib/bot_telegram.js",
+    "start": "echo Select a platform to start by running \"npm run [platform]\"",
+    "telegram": "node lib/bot_telegram.js",
+    "discord": "node lib/bot_discord.js",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "dependencies": {
+    "discord.js": "^12.1.1",
     "dotenv": "^6.2.0",
     "firebase-admin": "^8.10.0",
     "node-telegram-bot-api": "^0.30.0",
