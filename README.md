@@ -27,7 +27,9 @@ Do `git clone` and `npm install`. You'll also need to set a few environment vari
 3. Go to Project Settings -> Overview -> Service accounts and "Generate a new private key". A `.json` file will be downloaded
 4. That `.json` contains a lot of stuff. Find `project_id`, `client_email` and `private_key` and copy them to the their respective environment variables in `.env` file.
 
-`TOKEN` - [Telegram Bot API key](https://core.telegram.org/bots/api#authorizing-your-bot) or [Discord Bot API key](https://discordapp.com/developers/docs/topics/oauth2)
+`TELEGRAM_TOKEN` - [Telegram Bot API key](https://core.telegram.org/bots/api#authorizing-your-bot)
+and/or
+`DISCORD_TOKEN` - [Discord Bot API key](https://discordapp.com/developers/docs/topics/oauth2)
 
 `GCP_API_KEY` - API key to the [Google Translate API](https://console.cloud.google.com/apis/api/translate.googleapis.com/overview). Enable this API and use it (it always starts with "Alza")
 

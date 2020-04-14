@@ -7,9 +7,9 @@ export class DiscordConfig {
   TOKEN: string
 
   constructor() {
-    if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+    if (!process.env.DISCORD_TOKEN) throw new Error("DISCORD_TOKEN is missing!")
 
-    const TOKEN = process.env.TOKEN
+    const TOKEN = process.env.DISCORD_TOKEN
 
     this.TOKEN = TOKEN
 

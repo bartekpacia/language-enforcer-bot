@@ -7,9 +7,9 @@ export class TelegramConfig {
   TOKEN: string
 
   constructor() {
-    if (!process.env.TOKEN) throw new Error("TOKEN is missing!")
+    if (!process.env.TELEGRAM_TOKEN) throw new Error("TELEGRAM_TOKEN is missing!")
 
-    const TOKEN = process.env.TOKEN
+    const TOKEN = process.env.TELEGRAM_TOKEN
 
     this.TOKEN = TOKEN
 
