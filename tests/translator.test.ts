@@ -15,12 +15,21 @@ describe("translating functionality", () => {
     expect(translation.translatedText).to.equal("sample text in Polish")
   })
 
-  it("should fail gracefully", async () => {
+  it("should fail gracefully 1", async () => {
     const testText = "1234567890"
 
     const translation = await translator.translateRich(testText, core.config)
     expect(translation.inputText).to.equal(testText)
     expect(translation.detectedLangCode).to.equal("und")
+    expect(translation.detectedLangName).to.equal("unknown")
+    expect(translation.translatedText).to.equal(testText)
+  })
+
+  it("should fail gracefully 2", async () => {
+    const testText = "dang nice"
+
+    const translation = await translator.translateRich(testText, core.config)
+    expect(translation.inputText).to.equal(testText)
     expect(translation.detectedLangName).to.equal("unknown")
     expect(translation.translatedText).to.equal(testText)
   })

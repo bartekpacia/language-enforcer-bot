@@ -25,7 +25,7 @@ export async function translateAndCheck(
   let isCorrectLang = translation.detectedLangCode === requiredLangCode
 
   // Handle edge cases (when no language is detected)
-  if (translation.detectedLangCode === "und" || requiredLangName === "unknown") {
+  if (translation.detectedLangCode === "und" || translation.detectedLangCode === "unknown") {
     console.log(
       `Couldn't detect language (detectedLang === "und" || "unknown"). Assuming that isCorrectLang = true.`
     )
