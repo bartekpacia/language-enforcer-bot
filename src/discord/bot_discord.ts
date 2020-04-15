@@ -127,7 +127,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         return
       }
 
-      await channel.overwritePermissions(
+      channel.overwritePermissions(
         [
           {
             id: msg.member,
@@ -154,7 +154,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
           return
         }
 
-        await channel.overwritePermissions(
+        channel.overwritePermissions(
           [
             {
               id: msg.member,
