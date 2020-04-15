@@ -21,7 +21,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       if (msg.chat.type === "private") {
         console.log("Message was sent in a private chat, returned. (msg.chat.type === private)")
-        await this.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
+        this.sendMessage(msg.chat.id, "Sorry, I work only in groups.")
         return
       }
 
@@ -36,7 +36,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         const permitted = await core.shouldBePermitted(msg.text)
 
         if (!permitted && translationContext.translation) {
-          await this.performAction(
+          this.performAction(
             msg,
             translationContext.translation.detectedLangName,
             translationContext.requiredLangName,
@@ -65,7 +65,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
         console.log("User is not an admin. Returned.")
-        await this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
         return
       }
 
@@ -78,12 +78,9 @@ export class EnforcingTelegramBot extends TelegramBot {
       const successful = await core.addException(inputText)
 
       if (successful) {
-        await this.sendMessage(
-          chatId,
-          `Okay, "${inputText}" has been added to the exception list. `
-        )
+        this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
       } else {
-        await this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
+        this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
       }
     })
 
@@ -106,7 +103,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
         console.log("User is not an admin. Returned.")
-        await this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
         return
       }
 
@@ -119,12 +116,9 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       // send back the matched "whatever" to the chat
       if (successful) {
-        await this.sendMessage(
-          chatId,
-          `Okay, "${inputText}" has been removed from the exception list.`
-        )
+        this.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
       } else {
-        await this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
+        this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
       }
     })
   }
@@ -157,7 +151,7 @@ export class EnforcingTelegramBot extends TelegramBot {
     const sender = await this.getChatMember(msg.chat.id, msg.from.id.toString())
 
     if (config.MUTE_PEOPLE && !EnforcingTelegramBot.isAdminUser(sender)) {
-      await this.mute(msg, sender)
+      this.mute(msg, sender)
       message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
     }
 
@@ -169,7 +163,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
     }
 
-    await this.sendMessage(msg.chat.id, message, {
+    this.sendMessage(msg.chat.id, message, {
       reply_to_message_id: msg.message_id,
       parse_mode: "HTML"
     })
@@ -186,7 +180,7 @@ export class EnforcingTelegramBot extends TelegramBot {
     console.log(`mute() function invoked for user ${sender.user.first_name}, isAdmin: ${isAdmin}`)
 
     if (!isAdmin) {
-      await this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
+      this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
         can_send_messages: false,
         can_send_media_messages: false,
         can_send_other_messages: false,
@@ -198,7 +192,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       )
 
       setTimeout(async () => {
-        await this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
+        this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
           can_send_messages: true,
           can_send_media_messages: true,
           can_send_other_messages: true,

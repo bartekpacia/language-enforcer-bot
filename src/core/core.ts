@@ -27,9 +27,7 @@ admin.initializeApp({
  * @return TranslationData object or null
  */
 async function translateAndCheck(messageText: string): Promise<TranslationContext> {
-  const translationContext = await translator.translateAndCheck(messageText, config)
-
-  return translationContext
+  return translator.translateAndCheck(messageText, config)
 }
 
 /**
