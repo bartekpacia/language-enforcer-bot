@@ -3,14 +3,14 @@
  */
 
 import * as DiscordBot from "discord.js"
-import * as core from "./core"
+import * as core from "../core/core"
 
 import { DiscordConfig } from "./types_discord"
 
 const { config } = core
 const discordConfig = new DiscordConfig()
 
-const bot = new DiscordBot.Client()
+export const bot = new DiscordBot.Client()
 bot.login(discordConfig.TOKEN)
 
 /**
@@ -161,7 +161,7 @@ async function mute(msg: DiscordBot.Message): Promise<void> {
     return
   }
 
-  msg.guild.channels.cache.forEach(async (channel, id) => {
+  msg.guild.channels.cache.forEach(async channel => {
     if (!msg.member) {
       console.log("Message author is no longer a server member. Returned")
       return
@@ -188,7 +188,7 @@ async function mute(msg: DiscordBot.Message): Promise<void> {
       return
     }
 
-    msg.guild.channels.cache.forEach(async (channel, id) => {
+    msg.guild.channels.cache.forEach(async channel => {
       if (!msg.member) {
         console.log("Message author is no longer a server member. Returned")
         return

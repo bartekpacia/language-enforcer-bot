@@ -121,9 +121,7 @@ async function translatePoor(text: string, config: CoreConfig): Promise<Translat
 
     return new Translation(text, detectedLangCode, detectedLangName, translatedText, confidence)
   } catch (err) {
-    console.log(
-      "Couldn't translate the message using POOR method. The bot should now fallback to the RICH method"
-    )
+    // Happens pretty often, just fallback to the RICH method
     return null
   }
 }

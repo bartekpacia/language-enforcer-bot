@@ -17,8 +17,8 @@
     "build": "tsc",
     "gcp-build": "npm run build",
     "start": "echo Select a platform to start by running \"npm run [platform]\"",
-    "telegram": "node lib/bot_telegram.js",
-    "discord": "node lib/bot_discord.js",
+    "telegram": "node lib/telegram/bot_telegram.js",
+    "discord": "node lib/discord/bot_discord.js",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "dependencies": {

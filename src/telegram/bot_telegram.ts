@@ -3,13 +3,13 @@
  */
 
 import * as TelegramBot from "node-telegram-bot-api"
-import * as core from "./core"
+import * as core from "../core/core"
 import { TelegramConfig } from "./types_telegram"
 
 const { config } = core
 const telegramConfig = new TelegramConfig()
 
-const bot = new TelegramBot(telegramConfig.TOKEN, { polling: true })
+export const bot = new TelegramBot(telegramConfig.TOKEN, { polling: true })
 
 /**
  * Returns true if the user is an admin or a creator, false otherwise.

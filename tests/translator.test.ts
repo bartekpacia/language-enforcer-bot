@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import * as translator from "../src/translator"
-import * as core from "../src/core"
+import * as translator from "../src/core/translator"
+import * as core from "../src/core/core"
 
 core.config.REQUIRED_LANG = "en"
 
