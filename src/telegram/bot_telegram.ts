@@ -146,7 +146,7 @@ export class EnforcingTelegramBot extends TelegramBot {
     }
 
     console.log(`Performing rebuke/mute/translate action on user ${msg.from.first_name}.`)
-    let message = `Oi, I don't concur with this ${detectedLangName}! We only use ${requiredLangName} here.\n`
+    let message = `I don't concur with this ${detectedLangName}! We only use ${requiredLangName} here.\n`
 
     const sender = await this.getChatMember(msg.chat.id, msg.from.id.toString())
 
