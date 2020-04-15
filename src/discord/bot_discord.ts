@@ -12,7 +12,7 @@ const { config } = core
 export class EnforcingDiscordBot extends DiscordBot.Client {
   constructor(discordConfig: DiscordConfig) {
     super()
-    this.login(discordConfig.TOKEN)
+    this.login(discordConfig.DISCORD_TOKEN)
 
     // Handles all messages and checks whether they're in the specified language
     this.on("message", async msg => {

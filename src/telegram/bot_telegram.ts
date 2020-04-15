@@ -10,7 +10,7 @@ const { config } = core
 
 export class EnforcingTelegramBot extends TelegramBot {
   constructor(telegramConfig: TelegramConfig) {
-    super(telegramConfig.TOKEN, { polling: true })
+    super(telegramConfig.TELEGRAM_TOKEN, { polling: true })
 
     // The essence of this bot, scan all messages
     this.on("message", async msg => {
