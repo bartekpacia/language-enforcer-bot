@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/bartekpacia/telegram-lang-enforcer.svg?branch=dev)](https://travis-ci.com/bartekpacia/telegram-lang-enforcer)
 # LangPolizei (German for Language Police)
 
 Toolkit and Telegram/Discord Bot to enforce one language in the _group_ chat. How does it do it?
