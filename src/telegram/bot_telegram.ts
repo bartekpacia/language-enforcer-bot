@@ -152,7 +152,7 @@ export class EnforcingTelegramBot extends TelegramBot {
     }
 
     console.log(`Performing rebuke/mute/translate action on user ${msg.from.first_name}.`)
-    let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
+    let message = `Oi, I don't concur with this ${detectedLangName}! We only use ${requiredLangName} here.\n`
 
     const sender = await this.getChatMember(msg.chat.id, msg.from.id.toString())
 
@@ -163,9 +163,9 @@ export class EnforcingTelegramBot extends TelegramBot {
 
     if (config.BE_HELPFUL) {
       if (translatedText !== msg.text) {
-        message += `BTW, they tried to say "${translatedText}"`
+        message += `BTW, we know you mean "${translatedText}"`
       } else {
-        message += "BTW, I've no idea what they tried to say."
+        message += "BTW, we've no idea what you tried to say."
       }
     }
 

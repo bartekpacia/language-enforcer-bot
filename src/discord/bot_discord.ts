@@ -88,7 +88,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     }
 
     console.log(`Performing rebuke/mute/translate action on user ${msg.author.username}...`)
-    let message = `Hey, man, don't speak this ${detectedLangName} anymore! We only do ${requiredLangName} down here.\n`
+    let message = `Oi, I don't concur with this ${detectedLangName}! We only use ${requiredLangName} here.\n`
 
     if (config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
       this.mute(msg)
@@ -97,9 +97,9 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     if (config.BE_HELPFUL) {
       if (translatedText !== msg.content) {
-        message += `BTW, they tried to say "${translatedText}"`
+        message += `BTW,we know you mean "${translatedText}"`
       } else {
-        message += "BTW, I've no idea what they tried to say."
+        message += "BTW, we've no idea what you tried to say."
       }
     }
 
