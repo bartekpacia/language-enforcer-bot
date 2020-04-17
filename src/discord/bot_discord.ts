@@ -3,15 +3,17 @@
  */
 
 import * as DiscordBot from "discord.js"
-import * as core from "../core/core"
+import { Core } from "../core/core"
 
 import { DiscordConfig } from "./types_discord"
 
-const { config } = core
-
 export class EnforcingDiscordBot extends DiscordBot.Client {
-  constructor(discordConfig: DiscordConfig) {
+  readonly core: Core
+
+  constructor(core: Core, discordConfig: DiscordConfig) {
     super()
+    this.core = core
+
     this.login(discordConfig.DISCORD_TOKEN)
 
     // Handles all messages and checks whether they're in the specified language
@@ -90,12 +92,12 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     console.log(`Performing rebuke/mute/translate action on user ${msg.author.username}...`)
     let message = `Hey, don't speak ${detectedLangName}! We only use ${requiredLangName} here.\n`
 
-    if (config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
+    if (this.core.config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
       this.mute(msg)
-      message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
+      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.\n`
     }
 
-    if (config.BE_HELPFUL) {
+    if (this.core.config.BE_HELPFUL) {
       if (translatedText !== msg.content) {
         message += `BTW,we know you mean "${translatedText}"`
       } else {
@@ -138,7 +140,9 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       )
     })
 
-    console.log(`Muting user ${msg.author.username} for ${config.MUTE_TIMEOUT / 1000} seconds.`)
+    console.log(
+      `Muting user ${msg.author.username} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`
+    )
 
     setTimeout(async () => {
       if (!msg.guild) {
@@ -165,7 +169,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         )
       })
       console.log(`Unmuted user ${msg.author.username}.`)
-    }, config.MUTE_TIMEOUT)
+    }, this.core.config.MUTE_TIMEOUT)
   }
 
   /**
@@ -180,7 +184,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await core.addException(inputText)
+    const successful = await this.core.addException(inputText)
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been added to the exception list. `)
@@ -201,7 +205,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await core.removeException(inputText)
+    const successful = await this.core.removeException(inputText)
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been removed from the exception list. `)

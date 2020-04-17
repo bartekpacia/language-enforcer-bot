@@ -3,14 +3,15 @@
  */
 
 import * as TelegramBot from "node-telegram-bot-api"
-import * as core from "../core/core"
+import { Core } from "../core/core"
 import { TelegramConfig } from "./types_telegram"
 
-const { config } = core
-
 export class EnforcingTelegramBot extends TelegramBot {
-  constructor(telegramConfig: TelegramConfig) {
+  readonly core: Core
+
+  constructor(core: Core, telegramConfig: TelegramConfig) {
     super(telegramConfig.TELEGRAM_TOKEN, { polling: true })
+    this.core = core
 
     // The essence of this bot, scan all messages
     this.on("message", async msg => {
@@ -150,12 +151,12 @@ export class EnforcingTelegramBot extends TelegramBot {
 
     const sender = await this.getChatMember(msg.chat.id, msg.from.id.toString())
 
-    if (config.MUTE_PEOPLE && !EnforcingTelegramBot.isAdminUser(sender)) {
+    if (this.core.config.MUTE_PEOPLE && !EnforcingTelegramBot.isAdminUser(sender)) {
       this.mute(msg, sender)
-      message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
+      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.\n`
     }
 
-    if (config.BE_HELPFUL) {
+    if (this.core.config.BE_HELPFUL) {
       if (translatedText !== msg.text) {
         message += `BTW, we know you mean "${translatedText}"`
       } else {
@@ -188,7 +189,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       })
 
       console.log(
-        `Muting user ${sender.user.first_name} for ${config.MUTE_TIMEOUT / 1000} seconds.`
+        `Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`
       )
 
       setTimeout(async () => {
@@ -200,7 +201,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         })
 
         console.log(`Unmuted user ${sender.user.first_name}.`)
-      }, config.MUTE_TIMEOUT)
+      }, this.core.config.MUTE_TIMEOUT)
     }
   }
 }
