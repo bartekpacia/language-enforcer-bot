@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/bartekpacia/telegram-lang-enforcer.svg?branch=dev)](https://travis-ci.com/bartekpacia/telegram-lang-enforcer)
-# LangPolizei (German for Language Police)
+
+# LangPolizei (Language Police)
 
 Toolkit and Telegram/Discord Bot to enforce one language in the _group_ chat. How does it do it?
 
@@ -7,7 +8,7 @@ If LangPolizei detects that the language doesn't match the one specified in `.en
 
 ## Usage
 
-The bot, once added to the group chat, should be granted with admin privileges. Admins can also add particular words as "exceptions". The bot will be relaxed about them in the future.
+The bot, once added to the group chat / server **should be granted with admin privileges**. Admins can also add particular words as "exceptions". The bot will be relaxed about them in the future.
 
 **To add or remove an exception**
 
@@ -20,6 +21,10 @@ or
 `/remove yeah boii`
 
 ## How to run it?
+
+The bot is designed to run on [Google Cloud Platform](https://cloud.google.com/)'s [App Engine](https://cloud.google.com/appengine). Usually, setting everything correctly takes about 20-30 minutes.
+
+**Ready? It won't be hard:)**
 
 Do `git clone` and `npm install`. You'll also need to set a few environment variables and projects.
 
@@ -51,7 +56,7 @@ and/or
 
 It uses [Cloud Firestore](https://firebase.google.com/products/firestore), so you'll need to create a new Firestore project.
 
-Finally, run `npm run [PLATFORM NAME]` to start the bot
+Finally, run `npm run [PLATFORM NAME]` to start the bot for the specific platform or `npm run start` to run bots for all platforms.
 
 ## Structure
 
@@ -68,12 +73,12 @@ It uses:
 - [Google Translate API](https://cloud.google.com/translate/docs) to detect the message's language
 - [Cloud Firestore](https://firebase.google.com/products/firestore/) to save exceptions
 
-The Telegram Bot implementation takes advantage of the [Telegram Bot API](https://core.telegram.org/bots/api), and the Discord Bot implementation of the [Discord Bot API](https://discordapp.com/developers/docs/intro#bots-and-apps).
+The Telegram Bot implementation takes advantage of the [Telegram Bot API](https://core.telegram.org/bots/api), and the Discord Bot uses the [Discord Bot API](https://discordapp.com/developers/docs/intro#bots-and-apps).
 
 ## Create your own bot!
 
 If you want to create a similar bot for some other messenger service (IRC, Slack, etc), we'll be
-happy to help you. Only one very smart person has done that before (@diogoscf), so you'll be our second early adopter :)
+happy to help you. Only one very smart person has done that before ([@diogoscf](https://github.com/diogoscf)), so you'll be our second early adopter :)
 
 1. Take a look at how [`bot_telegram.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_telegram.ts) and [`bot_discord.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_discord.ts) are written
 2. You'll see that they do platform-specific integration stuff and delegate the business logic to [`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)
@@ -81,31 +86,3 @@ happy to help you. Only one very smart person has done that before (@diogoscf), 
 
 PS If you find any bugs or have some ingenious idea on how something could be improved, we'll be happy
 to accept your Pull Requests.
-
-## Ideas:
-
-- ban only if `confidence` is big enough. If it isn't, don't mute, just send a message
-  like "What you sent doesn't seem to be in English..." (**after evaluation: not a good solution,
-  confidence is often wrong**)
-- make the bot truly helpful (suggested by @MatejMecka). Make it translate the messages
-  instead of banning people
-- rewrite it to a _real_ and _serious_ object-oriented programming language (like Kotlin). We could create a interface for the bot, an abstract class implementing the
-  basic behaviours and let the actual bot implementations handle platform-specific stuff.
-
-## Example response from [Google Translate API](https://translation.googleapis.com/language/translate/v2/detect):
-
-```json
-{
-  "data": {
-    "detections": [
-      [
-        {
-          "confidence": 0.7859922051429749,
-          "isReliable": false,
-          "language": "en"
-        }
-      ]
-    ]
-  }
-}
-```
