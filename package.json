@@ -16,9 +16,9 @@
     "lint": "./node_modules/.bin/eslint --ext js,ts src",
     "build": "tsc",
     "gcp-build": "npm run build",
-    "start": "echo Select a platform to start by running \"npm run [platform]\"",
-    "telegram": "node lib/telegram/bot_telegram.js",
-    "discord": "node lib/discord/bot_discord.js",
+    "start": "node lib/app.js --telegram --discord",
+    "telegram": "node lib/app.js --telegram",
+    "discord": "node lib/app.js --discord",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "dependencies": {
