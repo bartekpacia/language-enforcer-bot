@@ -21,6 +21,7 @@
     "gcp-build": "npm run build",
     "start": "node lib/app.js --telegram --discord",
     "telegram": "node lib/app.js --telegram",
+    "telegram_dev": "node lib/app.js --telegram --dev",
     "discord": "node lib/app.js --discord",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
