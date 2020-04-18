@@ -47,8 +47,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
       const translationContext = await core.translateAndCheck(msg.content)
 
-      if (!translationContext) {
-        console.log("translationContext is null. That's probably an error. Returned.")
+      if (!translationContext.translation) {
+        console.log("translationContext.translation is null. That's probably an error. Returned.")
         return
       }
 

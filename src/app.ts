@@ -34,8 +34,19 @@ async function main(): Promise<void> {
   const discordRunning = process.argv.includes("--discord")
   const isDevMode = process.argv.includes("--dev")
 
-  const TELEGRAM_TOKEN = await getSecret(isDevMode ? TELEGRAM_TOKEN_NAME_DEV : TELEGRAM_TOKEN_NAME)
-  const DISCORD_TOKEN = await getSecret(DISCORD_TOKEN_NAME)
+  let TELEGRAM_TOKEN, DISCORD_TOKEN
+
+  try {
+    TELEGRAM_TOKEN = await getSecret(isDevMode ? TELEGRAM_TOKEN_NAME_DEV : TELEGRAM_TOKEN_NAME)
+  } catch {
+    TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
+  }
+
+  try {
+    DISCORD_TOKEN = await getSecret(DISCORD_TOKEN_NAME)
+  } catch {
+    DISCORD_TOKEN = process.env.DISCORD_TOKEN
+  }
 
   if (telegramRunning) {
     if (TELEGRAM_TOKEN != null) {
