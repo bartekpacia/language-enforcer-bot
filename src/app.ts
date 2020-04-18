@@ -13,27 +13,21 @@ import { Translator } from "./core/translator"
 
 export const config = new CoreConfig()
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: config.PROJECT_ID,
-    clientEmail: config.CLIENT_EMAIL,
-    privateKey: config.PRIVATE_KEY
-  })
-})
+admin.initializeApp()
 
 const secretClient = new SecretManagerServiceClient()
 
 async function main() {
   const core = new Core(config, new Translator())
 
-  // async function getSecret(): Promise<string | null | undefined> {
-  //   const [secret] = await secretClient.getSecret({ name: "TELEGRAM_TOKEN" })
+  async function getSecret(): Promise<string | null | undefined> {
+    const [version] = await secretClient.accessSecretVersion({ name: "TELEGRAM_TOKEN" })
 
-  //   return secret.name
-  // }
+    return version.payload?.data?.toString()
+  }
 
-  // const TELEGRAM_TOKEN = await getSecret()
-  // console.log(TELEGRAM_TOKEN)
+  const TELEGRAM_TOKEN = await getSecret()
+  console.log(TELEGRAM_TOKEN)
 
   const telegramRunning = process.argv.includes("--telegram")
   const discordRunning = process.argv.includes("--discord")
