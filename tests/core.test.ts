@@ -1,6 +1,12 @@
-import { expect } from "chai"
-import * as core from "../src/core/core"
+import * as dotenv from "dotenv"
+dotenv.config()
 
+import { expect } from "chai"
+import { Core } from "../src/core/core"
+import { CoreConfig } from "../src/core/types_core"
+import { Translator } from "../src/core/translator"
+
+const core = new Core(new CoreConfig(), new Translator())
 core.config.REQUIRED_LANG = "en"
 
 describe("core functionality", () => {
