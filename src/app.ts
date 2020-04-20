@@ -13,7 +13,13 @@ import { Translator } from "./core/translator"
 
 export const config = new CoreConfig()
 
-admin.initializeApp()
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: config.PROJECT_ID,
+    clientEmail: config.CLIENT_EMAIL,
+    privateKey: config.PRIVATE_KEY
+  })
+})
 
 const TELEGRAM_TOKEN_NAME = "projects/telegram-lang-enforcer/secrets/TELEGRAM_TOKEN/versions/latest"
 const TELEGRAM_TOKEN_NAME_DEV = "projects/telegram-lang-enforcer/secrets/TELEGRAM_TOKEN_DEV/versions/latest"
@@ -41,6 +47,7 @@ async function main(): Promise<void> {
     TELEGRAM_TOKEN = await getSecret(isDevMode ? TELEGRAM_TOKEN_NAME_DEV : TELEGRAM_TOKEN_NAME)
   } catch {
     TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
+    console.log("Getting TELEGRAM_TOKEN from GCP failed, falling back to env var.")
   }
 
   try {
