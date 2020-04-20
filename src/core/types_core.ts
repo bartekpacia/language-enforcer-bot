@@ -23,7 +23,7 @@ export class CoreConfig {
     if (!process.env.CLIENT_EMAIL) throw new Error("CLIENT_EMAIL is missing!")
     if (!process.env.PRIVATE_KEY) throw new Error("PRIVATE_KEY is missing!")
 
-    const GCP_API_KEY = process.env.GCP_API_KEY || "empty" // TODO: Discuss whether it's required
+    const GCP_API_KEY = process.env.GCP_API_KEY || "" // TODO: Discuss whether it's required
     const REQUIRED_LANG = process.env.REQUIRED_LANG || "en"
     const PROJECT_ID = process.env.PROJECT_ID
     const CLIENT_EMAIL = process.env.CLIENT_EMAIL

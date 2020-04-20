@@ -36,8 +36,8 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       const translationContext = await this.core.translateAndCheck(msg.text)
 
-      if (!translationContext) {
-        console.log("translationData is null. That's probably an error. Returned.")
+      if (!translationContext.translation) {
+        console.log("translationContext.translation is null. That's probably an error. Returned.")
         return
       }
 
