@@ -3,17 +3,27 @@
  */
 
 import * as DiscordBot from "discord.js"
-import * as core from "../core/core"
+import { Core } from "../core/core"
 
 import { DiscordConfig } from "./types_discord"
 
-const { config } = core
-
 export class EnforcingDiscordBot extends DiscordBot.Client {
-  constructor(discordConfig: DiscordConfig) {
-    super()
-    this.login(discordConfig.DISCORD_TOKEN)
+  readonly core: Core
 
+  readonly discordConfig: DiscordConfig
+
+  constructor(core: Core, config: DiscordConfig) {
+    super()
+    this.core = core
+    this.discordConfig = config
+
+    this.login(config.DISCORD_TOKEN)
+  }
+
+  /**
+   * Starts listening to new messages.
+   */
+  start(): void {
     // Handles all messages and checks whether they're in the specified language
     this.on("message", async msg => {
       if (msg.author === this.user) {
@@ -27,9 +37,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (msg.channel instanceof DiscordBot.DMChannel) {
-        console.log(
-          "Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)"
-        )
+        console.log("Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)")
         msg.reply("Sorry, I work only in servers.")
         return
       }
@@ -43,15 +51,15 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         this.handleRemove(msg, removeMatch)
       }
 
-      const translationContext = await core.translateAndCheck(msg.content)
+      const translationContext = await this.core.translateAndCheck(msg.content)
 
-      if (!translationContext) {
-        console.log("translationContext is null. That's probably an error. Returned.")
+      if (!translationContext.translation) {
+        console.log("translationContext.translation is null. That's probably an error. Returned.")
         return
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await core.shouldBePermitted(msg.content)
+        const permitted = await this.core.shouldBePermitted(msg.content)
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -63,6 +71,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         }
       }
     })
+
+    console.log("Started Discord bot.")
   }
 
   /**
@@ -90,12 +100,12 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     console.log(`Performing rebuke/mute/translate action on user ${msg.author.username}...`)
     let message = `Hey, don't speak ${detectedLangName}! We only use ${requiredLangName} here.\n`
 
-    if (config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
+    if (this.core.config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
       this.mute(msg)
-      message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
+      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.\n`
     }
 
-    if (config.BE_HELPFUL) {
+    if (this.core.config.BE_HELPFUL) {
       if (translatedText !== msg.content) {
         message += `BTW,we know you mean "${translatedText}"`
       } else {
@@ -115,9 +125,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     console.log(`mute() function invoked for user ${msg.author.username}`)
 
     if (!msg.guild) {
-      console.error(
-        "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
-      )
+      console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
       return
     }
 
@@ -138,13 +146,11 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       )
     })
 
-    console.log(`Muting user ${msg.author.username} for ${config.MUTE_TIMEOUT / 1000} seconds.`)
+    console.log(`Muting user ${msg.author.username} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
       if (!msg.guild) {
-        console.error(
-          "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
-        )
+        console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
         return
       }
 
@@ -165,7 +171,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         )
       })
       console.log(`Unmuted user ${msg.author.username}.`)
-    }, config.MUTE_TIMEOUT)
+    }, this.core.config.MUTE_TIMEOUT)
   }
 
   /**
@@ -180,7 +186,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await core.addException(inputText)
+    const successful = await this.core.addException(inputText)
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been added to the exception list. `)
@@ -201,7 +207,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await core.removeException(inputText)
+    const successful = await this.core.removeException(inputText)
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been removed from the exception list. `)

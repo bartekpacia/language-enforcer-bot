@@ -3,15 +3,24 @@
  */
 
 import * as TelegramBot from "node-telegram-bot-api"
-import * as core from "../core/core"
+import { Core } from "../core/core"
 import { TelegramConfig } from "./types_telegram"
 
-const { config } = core
-
 export class EnforcingTelegramBot extends TelegramBot {
-  constructor(telegramConfig: TelegramConfig) {
-    super(telegramConfig.TELEGRAM_TOKEN, { polling: true })
+  readonly core: Core
 
+  readonly telegramConfig: TelegramConfig
+
+  constructor(core: Core, config: TelegramConfig) {
+    super(config.TELEGRAM_TOKEN, { polling: true })
+    this.core = core
+    this.telegramConfig = config
+  }
+
+  /**
+   * Start listening to Telegram webhook.
+   */
+  start(): void {
     // The essence of this bot, scan all messages
     this.on("message", async msg => {
       if (msg.text === undefined) {
@@ -25,15 +34,15 @@ export class EnforcingTelegramBot extends TelegramBot {
         return
       }
 
-      const translationContext = await core.translateAndCheck(msg.text)
+      const translationContext = await this.core.translateAndCheck(msg.text)
 
-      if (!translationContext) {
-        console.log("translationData is null. That's probably an error. Returned.")
+      if (!translationContext.translation) {
+        console.log("translationContext.translation is null. That's probably an error. Returned.")
         return
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await core.shouldBePermitted(msg.text)
+        const permitted = await this.core.shouldBePermitted(msg.text)
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -75,7 +84,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         console.log("inputText is undefined. Returned.")
       }
 
-      const successful = await core.addException(inputText)
+      const successful = await this.core.addException(inputText)
 
       if (successful) {
         this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
@@ -112,7 +121,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         console.log("inputText is undefined. Returned.")
       }
 
-      const successful = await core.removeException(inputText)
+      const successful = await this.core.removeException(inputText)
 
       // send back the matched "whatever" to the chat
       if (successful) {
@@ -121,6 +130,8 @@ export class EnforcingTelegramBot extends TelegramBot {
         this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
       }
     })
+
+    console.log("Started Telegram bot.")
   }
 
   /**
@@ -150,12 +161,12 @@ export class EnforcingTelegramBot extends TelegramBot {
 
     const sender = await this.getChatMember(msg.chat.id, msg.from.id.toString())
 
-    if (config.MUTE_PEOPLE && !EnforcingTelegramBot.isAdminUser(sender)) {
+    if (this.core.config.MUTE_PEOPLE && !EnforcingTelegramBot.isAdminUser(sender)) {
       this.mute(msg, sender)
-      message += `You've been muted for ${config.MUTE_TIMEOUT / 1000} seconds.\n`
+      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.\n`
     }
 
-    if (config.BE_HELPFUL) {
+    if (this.core.config.BE_HELPFUL) {
       if (translatedText !== msg.text) {
         message += `BTW, we know you mean "${translatedText}"`
       } else {
@@ -187,9 +198,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         can_add_web_page_previews: false
       })
 
-      console.log(
-        `Muting user ${sender.user.first_name} for ${config.MUTE_TIMEOUT / 1000} seconds.`
-      )
+      console.log(`Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
 
       setTimeout(async () => {
         this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {
@@ -200,7 +209,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         })
 
         console.log(`Unmuted user ${sender.user.first_name}.`)
-      }, config.MUTE_TIMEOUT)
+      }, this.core.config.MUTE_TIMEOUT)
     }
   }
 }

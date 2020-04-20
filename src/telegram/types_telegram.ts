@@ -2,14 +2,10 @@
  * Telegram-specific configuration.
  */
 export class TelegramConfig {
-  TELEGRAM_TOKEN: string
+  readonly TELEGRAM_TOKEN: string
 
-  constructor() {
-    if (!process.env.TELEGRAM_TOKEN) throw new Error("TELEGRAM_TOKEN is missing!")
-
-    const TOKEN = process.env.TELEGRAM_TOKEN
-
-    this.TELEGRAM_TOKEN = TOKEN
+  constructor(token: string) {
+    this.TELEGRAM_TOKEN = token
 
     // console.log(`Created TelegramConfig object. TOKEN: ${TOKEN}`)
   }
