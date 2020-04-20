@@ -40,6 +40,8 @@ async function main(): Promise<void> {
   const discordRunning = process.argv.includes("--discord")
   const isDevMode = process.argv.includes("--dev")
 
+  console.log(`isDevMode: ${isDevMode}`)
+
   let TELEGRAM_TOKEN
   let DISCORD_TOKEN
 
