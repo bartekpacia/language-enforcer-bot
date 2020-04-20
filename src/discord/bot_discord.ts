@@ -29,9 +29,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (msg.channel instanceof DiscordBot.DMChannel) {
-        console.log(
-          "Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)"
-        )
+        console.log("Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)")
         msg.reply("Sorry, I work only in servers.")
         return
       }
@@ -117,9 +115,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     console.log(`mute() function invoked for user ${msg.author.username}`)
 
     if (!msg.guild) {
-      console.error(
-        "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
-      )
+      console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
       return
     }
 
@@ -140,15 +136,11 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       )
     })
 
-    console.log(
-      `Muting user ${msg.author.username} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`
-    )
+    console.log(`Muting user ${msg.author.username} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
 
     setTimeout(async () => {
       if (!msg.guild) {
-        console.error(
-          "Something very weird has happened. Somehow, there doesn't appear to be a Discord server"
-        )
+        console.error("Something very weird has happened. Somehow, there doesn't appear to be a Discord server")
         return
       }
 

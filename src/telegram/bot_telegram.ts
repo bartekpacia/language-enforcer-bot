@@ -9,10 +9,18 @@ import { TelegramConfig } from "./types_telegram"
 export class EnforcingTelegramBot extends TelegramBot {
   readonly core: Core
 
-  constructor(core: Core, telegramConfig: TelegramConfig) {
-    super(telegramConfig.TELEGRAM_TOKEN, { polling: true })
-    this.core = core
+  readonly telegramConfig: TelegramConfig
 
+  constructor(core: Core, config: TelegramConfig) {
+    super(config.TELEGRAM_TOKEN, { polling: true })
+    this.core = core
+    this.telegramConfig = config
+  }
+
+  /**
+   * Start listening to Telegram webhook.
+   */
+  start(): void {
     // The essence of this bot, scan all messages
     this.on("message", async msg => {
       if (msg.text === undefined) {
@@ -26,7 +34,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         return
       }
 
-      const translationContext = await core.translateAndCheck(msg.text)
+      const translationContext = await this.core.translateAndCheck(msg.text)
 
       if (!translationContext) {
         console.log("translationData is null. That's probably an error. Returned.")
@@ -34,7 +42,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await core.shouldBePermitted(msg.text)
+        const permitted = await this.core.shouldBePermitted(msg.text)
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -76,7 +84,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         console.log("inputText is undefined. Returned.")
       }
 
-      const successful = await core.addException(inputText)
+      const successful = await this.core.addException(inputText)
 
       if (successful) {
         this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
@@ -113,7 +121,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         console.log("inputText is undefined. Returned.")
       }
 
-      const successful = await core.removeException(inputText)
+      const successful = await this.core.removeException(inputText)
 
       // send back the matched "whatever" to the chat
       if (successful) {
@@ -122,6 +130,8 @@ export class EnforcingTelegramBot extends TelegramBot {
         this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
       }
     })
+
+    console.log("Started Telegram bot.")
   }
 
   /**
@@ -188,9 +198,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         can_add_web_page_previews: false
       })
 
-      console.log(
-        `Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`
-      )
+      console.log(`Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
 
       setTimeout(async () => {
         this.restrictChatMember(msg.chat.id, sender.user.id.toString(), {

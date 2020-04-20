@@ -27,9 +27,7 @@ export class Translator {
 
     // Handle edge cases (when no language is detected)
     if (translation.detectedLangCode === "und" || translation.detectedLangCode === "unknown") {
-      console.log(
-        `Couldn't detect language (detectedLang === "und" || "unknown"). Assuming that isCorrectLang = true.`
-      )
+      console.log(`Couldn't detect language (detectedLang === "und" || "unknown"). Assuming that isCorrectLang = true.`)
       isCorrectLang = true
     }
 

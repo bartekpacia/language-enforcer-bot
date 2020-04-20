@@ -133,9 +133,7 @@ export class Core {
       const text = doc.get("text")
       const similarityLevel = similarity.compareTwoStrings(text, inputText)
       if (similarityLevel >= 0.8) {
-        console.log(
-          `Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`
-        )
+        console.log(`Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`)
         return true
       }
     }

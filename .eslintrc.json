@@ -22,6 +22,12 @@
     "no-restricted-syntax": "off",
     "max-classes-per-file": "off",
     "class-methods-use-this": "off",
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ],
     "import/prefer-default-export": "off",
     "prefer-destructuring": ["error", { "array": false }],
     "import/first": "off",

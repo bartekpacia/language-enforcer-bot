@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   if (telegramRunning) {
     if (TELEGRAM_TOKEN != null) {
       const telegramBot = new telegram.EnforcingTelegramBot(core, new TelegramConfig(TELEGRAM_TOKEN))
-      console.log("Started Telegram bot.")
+      telegramBot.start()
     } else {
       console.error("TELEGRAM_TOKEN is null/undefined!")
     }
