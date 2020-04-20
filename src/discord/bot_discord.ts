@@ -10,12 +10,20 @@ import { DiscordConfig } from "./types_discord"
 export class EnforcingDiscordBot extends DiscordBot.Client {
   readonly core: Core
 
-  constructor(core: Core, discordConfig: DiscordConfig) {
+  readonly discordConfig: DiscordConfig
+
+  constructor(core: Core, config: DiscordConfig) {
     super()
     this.core = core
+    this.discordConfig = config
 
-    this.login(discordConfig.DISCORD_TOKEN)
+    this.login(config.DISCORD_TOKEN)
+  }
 
+  /**
+   * Starts listening to new messages.
+   */
+  start(): void {
     // Handles all messages and checks whether they're in the specified language
     this.on("message", async msg => {
       if (msg.author === this.user) {
@@ -43,7 +51,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         this.handleRemove(msg, removeMatch)
       }
 
-      const translationContext = await core.translateAndCheck(msg.content)
+      const translationContext = await this.core.translateAndCheck(msg.content)
 
       if (!translationContext.translation) {
         console.log("translationContext.translation is null. That's probably an error. Returned.")
@@ -51,7 +59,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await core.shouldBePermitted(msg.content)
+        const permitted = await this.core.shouldBePermitted(msg.content)
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -63,6 +71,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         }
       }
     })
+
+    console.log("Started Discord bot.")
   }
 
   /**

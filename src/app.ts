@@ -61,7 +61,7 @@ async function main(): Promise<void> {
   if (discordRunning) {
     if (DISCORD_TOKEN != null) {
       const discordBot = new discord.EnforcingDiscordBot(core, new DiscordConfig(DISCORD_TOKEN))
-      console.log("Started Discord bot.")
+      discordBot.start()
     } else {
       console.error("DISCORD_TOKEN is null/undefined")
     }
