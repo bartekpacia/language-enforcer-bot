@@ -22,7 +22,7 @@ export class EnforcingTelegramBot extends TelegramBot {
    */
   start(): void {
     // The essence of this bot, scan all messages
-    this.on("message", async msg => {
+    this.on("message", async (msg) => {
       if (msg.text === undefined) {
         console.log("Message doesn't contain text, returned. (msg.text === undefined)")
         return
@@ -65,8 +65,8 @@ export class EnforcingTelegramBot extends TelegramBot {
     })
 
     // Perform some initial setup when added to a group
-    this.on("new_chat_members", async msg => {
-      msg.new_chat_members?.forEach(async user => {
+    this.on("new_chat_members", async (msg) => {
+      msg.new_chat_members?.forEach(async (user) => {
         // TODO Find a better way, don't hardcode username
         if (user.username === "LangPolizeiBartekBot") {
           const chatId = `msg.chat.id: ${msg.chat.id}, msg.chat.title: ${msg.chat.title}`
@@ -75,10 +75,10 @@ export class EnforcingTelegramBot extends TelegramBot {
             msg.chat.id,
             `Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}. ${chatId}`,
             {
-              parse_mode: "HTML"
+              parse_mode: "HTML",
             }
           )
-          // await this.core.initNewGroup(msg.chat.id)
+          await this.core.initNewGroup(`TG_${msg.chat.id}`)
         }
       })
     })
@@ -109,7 +109,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       console.log("inputText is undefined. Returned.")
     }
 
-    const successful = await this.core.addException(inputText)
+    const successful = await this.core.addException(inputText, `TG_${msg.chat.id}`)
 
     if (successful) {
       this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
@@ -192,7 +192,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
     this.sendMessage(msg.chat.id, message, {
       reply_to_message_id: msg.message_id,
-      parse_mode: "HTML"
+      parse_mode: "HTML",
     })
   }
 
@@ -211,7 +211,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         can_send_messages: false,
         can_send_media_messages: false,
         can_send_other_messages: false,
-        can_add_web_page_previews: false
+        can_add_web_page_previews: false,
       })
 
       console.log(`Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
@@ -221,7 +221,7 @@ export class EnforcingTelegramBot extends TelegramBot {
           can_send_messages: true,
           can_send_media_messages: true,
           can_send_other_messages: true,
-          can_add_web_page_previews: true
+          can_add_web_page_previews: true,
         })
 
         console.log(`Unmuted user ${sender.user.first_name}.`)

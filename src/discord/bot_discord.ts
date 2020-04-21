@@ -25,7 +25,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
    */
   start(): void {
     // Handles all messages and checks whether they're in the specified language
-    this.on("message", async msg => {
+    this.on("message", async (msg) => {
       if (msg.author === this.user) {
         // prevents reacting to own messages
         return
@@ -129,7 +129,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       return
     }
 
-    msg.guild.channels.cache.forEach(async channel => {
+    msg.guild.channels.cache.forEach(async (channel) => {
       if (!msg.member) {
         console.log("Message author is no longer a server member. Returned")
         return
@@ -139,8 +139,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         [
           {
             id: msg.member,
-            deny: "SEND_MESSAGES"
-          }
+            deny: "SEND_MESSAGES",
+          },
         ],
         "Spoke wrong language"
       )
@@ -154,7 +154,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         return
       }
 
-      msg.guild.channels.cache.forEach(async channel => {
+      msg.guild.channels.cache.forEach(async (channel) => {
         if (!msg.member) {
           console.log("Message author is no longer a server member. Returned")
           return
@@ -164,8 +164,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
           [
             {
               id: msg.member,
-              allow: "SEND_MESSAGES"
-            }
+              allow: "SEND_MESSAGES",
+            },
           ],
           "Spoke wrong language - Timeout over"
         )
@@ -186,7 +186,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await this.core.addException(inputText)
+    const successful = await this.core.addException(inputText, "DIOGO HELP")
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been added to the exception list. `)

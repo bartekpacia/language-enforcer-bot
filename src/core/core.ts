@@ -22,21 +22,26 @@ export class Core {
     this.translator = translator
   }
 
+  async initNewGroup(groupId): Promise<void> {
+    await admin.firestore().collection("groups").doc(groupId).create({
+      requiredLang: "en",
+      mutePeople: false,
+      beHelpful: true,
+    })
+  }
+
   /**
    * Adds the specified text to the database.
    * @returns {Promise<boolean>} true if the operation is successful, false otherwise
    */
-  async addException(messageText: string): Promise<boolean> {
+  async addException(messageText: string, groupId: string): Promise<boolean> {
     // "match" is the result of executing the regexp above on the message's text
     const inputText = messageText.toLowerCase()
 
     try {
-      await admin
-        .firestore()
-        .collection("exceptions")
-        .add({
-          text: inputText
-        })
+      await admin.firestore().collection("groups").doc(groupId).collection("exceptions").add({
+        text: inputText,
+      })
     } catch (err) {
       console.error(err)
       return false
@@ -63,11 +68,7 @@ export class Core {
     const inputText = messageText.toLowerCase()
 
     try {
-      const exceptionsSnapshot = await admin
-        .firestore()
-        .collection("exceptions")
-        .where("text", "==", inputText)
-        .get()
+      const exceptionsSnapshot = await admin.firestore().collection("exceptions").where("text", "==", inputText).get()
 
       for (const doc of exceptionsSnapshot.docs) {
         doc.ref.delete() // bear in mind we are not waiting here for a Promise to be resolved
@@ -124,10 +125,7 @@ export class Core {
       return true
     }
 
-    const exceptionsSnapshot = await admin
-      .firestore()
-      .collection("exceptions")
-      .get()
+    const exceptionsSnapshot = await admin.firestore().collection("exceptions").get()
 
     for (const doc of exceptionsSnapshot.docs) {
       const text = doc.get("text")
