@@ -34,6 +34,15 @@ export class EnforcingTelegramBot extends TelegramBot {
         return
       }
 
+      const exceptMatch = msg.text.match(/\/except (.+)/)?.toString()
+      const removeMatch = msg.text.match(/\/remove (.+)/)?.toString()
+
+      if (exceptMatch) {
+        this.handleExcept(msg, exceptMatch)
+      } else if (removeMatch) {
+        this.handleRemove(msg, removeMatch)
+      }
+
       const translationContext = await this.core.translateAndCheck(msg.text)
 
       if (!translationContext.translation) {
@@ -55,83 +64,71 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
     })
 
-    // Handles adding messages from the database
-    this.onText(/\/except (.+)/, async (msg, match) => {
-      const chatId = msg.chat.id
-      const userId = msg.from?.id
-
-      if (!match) {
-        console.log("match is undefined. Returned.")
-        return
-      }
-
-      if (!userId) {
-        console.log("userId is undefined. Returned.")
-        return
-      }
-
-      const chatMember = await this.getChatMember(chatId, userId.toString())
-
-      if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
-        console.log("User is not an admin. Returned.")
-        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
-        return
-      }
-
-      // "match" is the result of executing the regexp above on the message's text
-      const inputText = match[1].toLowerCase()
-      if (!inputText) {
-        console.log("inputText is undefined. Returned.")
-      }
-
-      const successful = await this.core.addException(inputText)
-
-      if (successful) {
-        this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
-      } else {
-        this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
-      }
-    })
-
-    // Handles removing messages from the database
-    this.onText(/\/remove (.+)/, async (msg, match) => {
-      const chatId = msg.chat.id
-      const userId = msg.from?.id
-
-      if (!match) {
-        console.log("match is undefined. Returned.")
-        return
-      }
-
-      if (!userId) {
-        console.log("userId is undefined. Returned.")
-        return
-      }
-
-      const chatMember = await this.getChatMember(chatId, userId.toString())
-
-      if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
-        console.log("User is not an admin. Returned.")
-        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
-        return
-      }
-
-      const inputText = match[1].toLowerCase()
-      if (!inputText) {
-        console.log("inputText is undefined. Returned.")
-      }
-
-      const successful = await this.core.removeException(inputText)
-
-      // send back the matched "whatever" to the chat
-      if (successful) {
-        this.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
-      } else {
-        this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
-      }
-    })
-
     console.log("Started Telegram bot.")
+  }
+
+  async handleExcept(msg: TelegramBot.Message, match: string): Promise<void> {
+    const chatId = msg.chat.id
+    const userId = msg.from?.id
+
+    if (!userId) {
+      console.log("userId is undefined. Returned.")
+      return
+    }
+
+    const chatMember = await this.getChatMember(chatId, userId.toString())
+
+    if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
+      console.log("User is not an admin. Returned.")
+      this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+      return
+    }
+
+    // "match" is the result of executing the regexp above on the message's text
+    const inputText = match.toLowerCase()
+    if (!inputText) {
+      console.log("inputText is undefined. Returned.")
+    }
+
+    const successful = await this.core.addException(inputText)
+
+    if (successful) {
+      this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
+    } else {
+      this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
+    }
+  }
+
+  async handleRemove(msg: TelegramBot.Message, match: string): Promise<void> {
+    const chatId = msg.chat.id
+    const userId = msg.from?.id
+
+    if (!userId) {
+      console.log("userId is undefined. Returned.")
+      return
+    }
+
+    const chatMember = await this.getChatMember(chatId, userId.toString())
+
+    if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
+      console.log("User is not an admin. Returned.")
+      this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+      return
+    }
+
+    const inputText = match.toLowerCase()
+    if (!inputText) {
+      console.log("inputText is undefined. Returned.")
+    }
+
+    const successful = await this.core.removeException(inputText)
+
+    // send back the matched "whatever" to the chat
+    if (successful) {
+      this.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
+    } else {
+      this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
+    }
   }
 
   /**

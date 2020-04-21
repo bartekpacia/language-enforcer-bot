@@ -26,7 +26,6 @@
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "dependencies": {
-    "@google-cloud/secret-manager": "^3.0.0",
     "discord.js": "^12.2.0",
     "dotenv": "^6.2.0",
     "firebase-admin": "^8.10.0",
