@@ -64,6 +64,25 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
     })
 
+    // Perform some initial setup when added to a group
+    this.on("new_chat_members", async msg => {
+      msg.new_chat_members?.forEach(async user => {
+        // TODO Find a better way, don't hardcode username
+        if (user.username === "LangPolizeiBartekBot") {
+          await this.sendMessage(
+            msg.chat.id,
+            `Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`,
+            {
+              reply_to_message_id: msg.message_id,
+              parse_mode: "HTML"
+            }
+          )
+        }
+      })
+    })
+
+    this.on("")
+
     console.log("Started Telegram bot.")
   }
 
