@@ -78,7 +78,7 @@ export class EnforcingTelegramBot extends TelegramBot {
               parse_mode: "HTML",
             }
           )
-          await this.core.initNewGroup(`TG_${msg.chat.id}`)
+          await this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg.chat.id))
         }
       })
     })
@@ -109,7 +109,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       console.log("inputText is undefined. Returned.")
     }
 
-    const successful = await this.core.addException(inputText, `TG_${msg.chat.id}`)
+    const successful = await this.core.addException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg.chat.id))
 
     if (successful) {
       this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
@@ -140,7 +140,10 @@ export class EnforcingTelegramBot extends TelegramBot {
       console.log("inputText is undefined. Returned.")
     }
 
-    const successful = await this.core.removeException(inputText)
+    const successful = await this.core.removeException(
+      inputText,
+      EnforcingTelegramBot.createTelegramGroupId(msg.chat.id)
+    )
 
     // send back the matched "whatever" to the chat
     if (successful) {
@@ -155,6 +158,10 @@ export class EnforcingTelegramBot extends TelegramBot {
    */
   static isAdminUser(chatMember: TelegramBot.ChatMember): boolean {
     return chatMember.status === "administrator" || chatMember.status === "creator"
+  }
+
+  static createTelegramGroupId(rawGroupId: string | number): string {
+    return `TG_${rawGroupId}`
   }
 
   /**

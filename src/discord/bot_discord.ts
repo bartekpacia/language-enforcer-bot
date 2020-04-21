@@ -186,7 +186,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await this.core.addException(inputText, "DIOGO HELP")
+    const successful = await this.core.addException(inputText, this.createDiscordServerId(msg))
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been added to the exception list. `)
@@ -207,12 +207,21 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
     const inputText = match[1]
 
-    const successful = await this.core.removeException(inputText)
+    const successful = await this.core.removeException(inputText, this.createDiscordServerId(msg))
 
     if (successful) {
       msg.reply(`Okay, "${inputText}" has been removed from the exception list. `)
     } else {
       msg.reply(`An error occurred while removing the word ${inputText}`)
     }
+  }
+
+  createDiscordServerId(msg: DiscordBot.Message): string {
+    // From https://github.com/izy521/discord.io/issues/231#issuecomment-345990898
+    // FIXME: MIGHT NOT WORK! NOT TESTED!
+    // TODO: CHECK IF WORKS
+    const serverId = this.channels[msg.channel.id].guild_id
+
+    return `DC_${serverId}`
   }
 }

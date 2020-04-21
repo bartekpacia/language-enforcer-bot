@@ -22,6 +22,9 @@ export class Core {
     this.translator = translator
   }
 
+  /**
+   * Creates document for this group in Cloud Firestore.
+   */
   async initNewGroup(groupId): Promise<void> {
     await admin.firestore().collection("groups").doc(groupId).create({
       requiredLang: "en",
@@ -63,12 +66,18 @@ export class Core {
    * @param {string} messageText message's text
    * @returns {Promise<bool>} true if the operation is successful, false otherwise
    */
-  async removeException(messageText: string): Promise<boolean> {
+  async removeException(messageText: string, groupId: string): Promise<boolean> {
     // "match" is the result of executing the regexp above on the message's text
     const inputText = messageText.toLowerCase()
 
     try {
-      const exceptionsSnapshot = await admin.firestore().collection("exceptions").where("text", "==", inputText).get()
+      const exceptionsSnapshot = await admin
+        .firestore()
+        .collection("groups")
+        .doc(groupId)
+        .collection("exceptions")
+        .where("text", "==", inputText)
+        .get()
 
       for (const doc of exceptionsSnapshot.docs) {
         doc.ref.delete() // bear in mind we are not waiting here for a Promise to be resolved
