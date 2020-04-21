@@ -95,18 +95,13 @@ export class Core {
    * @param {string} messageText message's text
    * @returns {Promise<boolean>} true if the message should be permitted, false otherwise
    */
-  async shouldBePermitted(messageText: string): Promise<boolean> {
+  async shouldBePermitted(messageText: string, groupId: string): Promise<boolean> {
     const inputText = messageText.toLowerCase()
 
     // Don't punish for short messages
     if (messageText.length <= 4) {
       return true
     }
-
-    // Don't punish if user's name occurs in the message
-    // if (msg.text.includes(msg.chat.first_name) || msg.text.includes(msg.chat.last_name)) {
-    //   return false
-    // }
 
     // Disable for commands and mentions
     if (messageText.startsWith("/") || messageText.startsWith("@")) {
@@ -134,12 +129,12 @@ export class Core {
       return true
     }
 
-    const exceptionsSnapshot = await admin.firestore().collection("exceptions").get()
+    const exceptionsSnapshot = await admin.firestore().collection("groups").doc(groupId).collection("exceptions").get()
 
     for (const doc of exceptionsSnapshot.docs) {
       const text = doc.get("text")
       const similarityLevel = similarity.compareTwoStrings(text, inputText)
-      if (similarityLevel >= 0.8) {
+      if (similarityLevel >= 0.75) {
         console.log(`Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`)
         return true
       }

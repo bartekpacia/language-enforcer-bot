@@ -34,13 +34,17 @@ export class EnforcingTelegramBot extends TelegramBot {
         return
       }
 
-      const exceptMatch = msg.text.match(/\/except (.+)/)?.toString()
-      const removeMatch = msg.text.match(/\/remove (.+)/)?.toString()
+      const exceptMatch = msg.text.match(/\/except (.+)/)
+      const removeMatch = msg.text.match(/\/remove (.+)/)
 
-      if (exceptMatch) {
-        this.handleExcept(msg, exceptMatch)
-      } else if (removeMatch) {
-        this.handleRemove(msg, removeMatch)
+      if (exceptMatch && exceptMatch[1]) {
+        const match = exceptMatch[1]
+        console.log(`matched except: ${match}`)
+        this.handleExcept(msg, match)
+      } else if (removeMatch && removeMatch[1]) {
+        const match = removeMatch[1]
+        console.log(`matched remove: ${match}`)
+        this.handleRemove(msg, match)
       }
 
       const translationContext = await this.core.translateAndCheck(msg.text)
@@ -51,7 +55,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await this.core.shouldBePermitted(msg.text)
+        const permitted = await this.core.shouldBePermitted(msg.text, EnforcingTelegramBot.createTelegramGroupId(msg))
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -78,7 +82,7 @@ export class EnforcingTelegramBot extends TelegramBot {
               parse_mode: "HTML",
             }
           )
-          await this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg.chat.id))
+          await this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg))
         }
       })
     })
@@ -109,7 +113,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       console.log("inputText is undefined. Returned.")
     }
 
-    const successful = await this.core.addException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg.chat.id))
+    const successful = await this.core.addException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg))
 
     if (successful) {
       this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
@@ -140,10 +144,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       console.log("inputText is undefined. Returned.")
     }
 
-    const successful = await this.core.removeException(
-      inputText,
-      EnforcingTelegramBot.createTelegramGroupId(msg.chat.id)
-    )
+    const successful = await this.core.removeException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg))
 
     // send back the matched "whatever" to the chat
     if (successful) {
@@ -160,8 +161,8 @@ export class EnforcingTelegramBot extends TelegramBot {
     return chatMember.status === "administrator" || chatMember.status === "creator"
   }
 
-  static createTelegramGroupId(rawGroupId: string | number): string {
-    return `TG_${rawGroupId}`
+  static createTelegramGroupId(msg: TelegramBot.Message): string {
+    return `TG_${msg.chat.id}`
   }
 
   /**

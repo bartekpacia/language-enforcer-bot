@@ -59,7 +59,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await this.core.shouldBePermitted(msg.content)
+        const permitted = await this.core.shouldBePermitted(msg.content, this.createDiscordServerId(msg))
 
         if (!permitted && translationContext.translation) {
           this.performAction(
