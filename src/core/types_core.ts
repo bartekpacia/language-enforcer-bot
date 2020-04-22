@@ -1,5 +1,3 @@
-import { threadId } from "worker_threads"
-
 /**
  * Configuration that is shared among all messaging frontends.
  */
