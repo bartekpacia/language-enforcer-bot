@@ -77,18 +77,18 @@ export class EnforcingTelegramBot extends TelegramBot {
     // Perform some initial setup when added to a group
     this.on("new_chat_members", async (msg) => {
       msg.new_chat_members?.forEach(async (user) => {
-        // TODO Find a better way, don't hardcode username
-        if (user.username === "LangPolizeiBartekBot") {
+        const botData = await this.getMe()
+        if (user.id === botData.id) {
           const chatId = `msg.chat.id: ${msg.chat.id}, msg.chat.title: ${msg.chat.title}`
 
-          await this.sendMessage(
+          this.sendMessage(
             msg.chat.id,
             `Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}. ${chatId}`,
             {
               parse_mode: "HTML"
             }
           )
-          await this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg))
+          this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg))
         }
       })
     })

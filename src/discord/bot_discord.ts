@@ -217,11 +217,6 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
   }
 
   createDiscordServerId(msg: DiscordBot.Message): string {
-    // From https://github.com/izy521/discord.io/issues/231#issuecomment-345990898
-    // FIXME: MIGHT NOT WORK! NOT TESTED!
-    // TODO: CHECK IF WORKS
-    const serverId = this.channels[msg.channel.id].guild_id
-
-    return `DC_${serverId}`
+    return `DC_${msg.guild?.id}`
   }
 }
