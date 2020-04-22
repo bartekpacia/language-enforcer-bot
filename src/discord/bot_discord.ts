@@ -139,8 +139,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         [
           {
             id: msg.member,
-            deny: "SEND_MESSAGES",
-          },
+            deny: "SEND_MESSAGES"
+          }
         ],
         "Spoke wrong language"
       )
@@ -164,8 +164,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
           [
             {
               id: msg.member,
-              allow: "SEND_MESSAGES",
-            },
+              allow: "SEND_MESSAGES"
+            }
           ],
           "Spoke wrong language - Timeout over"
         )

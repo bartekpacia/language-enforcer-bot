@@ -29,7 +29,7 @@ export class Core {
     await admin.firestore().collection("groups").doc(groupId).create({
       requiredLang: "en",
       mutePeople: false,
-      beHelpful: true,
+      beHelpful: true
     })
   }
 
@@ -43,7 +43,7 @@ export class Core {
 
     try {
       await admin.firestore().collection("groups").doc(groupId).collection("exceptions").add({
-        text: inputText,
+        text: inputText
       })
     } catch (err) {
       console.error(err)
