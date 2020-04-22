@@ -23,6 +23,7 @@
     "max-classes-per-file": "off",
     "class-methods-use-this": "off",
     "no-unused-expressions": "off",
+    "comma-dangle": ["error", "never"],
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
