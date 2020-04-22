@@ -5,6 +5,7 @@
 import * as TelegramBot from "node-telegram-bot-api"
 import { Core } from "../core/core"
 import { TelegramConfig } from "./types_telegram"
+import { IGroupConfig } from "../core/types_core"
 
 export class EnforcingTelegramBot extends TelegramBot {
   readonly core: Core
@@ -22,7 +23,7 @@ export class EnforcingTelegramBot extends TelegramBot {
    */
   start(): void {
     // The essence of this bot, scan all messages
-    this.on("message", async msg => {
+    this.on("message", async (msg) => {
       if (msg.text === undefined) {
         console.log("Message doesn't contain text, returned. (msg.text === undefined)")
         return
@@ -34,6 +35,24 @@ export class EnforcingTelegramBot extends TelegramBot {
         return
       }
 
+      const exceptMatch = msg.text.match(/\/except (.+)/)
+      const removeMatch = msg.text.match(/\/remove (.+)/)
+      const showConfigMatch = msg.text.match(/\/config/)
+
+      if (exceptMatch && exceptMatch[1]) {
+        const match = exceptMatch[1]
+        console.log(`matched except: ${match}`)
+        this.handleExcept(msg, match)
+      } else if (removeMatch && removeMatch[1]) {
+        const match = removeMatch[1]
+        console.log(`matched remove: ${match}`)
+        this.handleRemove(msg, match)
+      } else if (showConfigMatch) {
+        console.log("Showing config")
+        const groupConfig = await this.core.showGroupConfig(EnforcingTelegramBot.createTelegramGroupId(msg))
+        this.handleShowConfig(msg, groupConfig)
+      }
+
       const translationContext = await this.core.translateAndCheck(msg.text)
 
       if (!translationContext.translation) {
@@ -42,7 +61,7 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await this.core.shouldBePermitted(msg.text)
+        const permitted = await this.core.shouldBePermitted(msg.text, EnforcingTelegramBot.createTelegramGroupId(msg))
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -55,83 +74,96 @@ export class EnforcingTelegramBot extends TelegramBot {
       }
     })
 
-    // Handles adding messages from the database
-    this.onText(/\/except (.+)/, async (msg, match) => {
-      const chatId = msg.chat.id
-      const userId = msg.from?.id
+    // Perform some initial setup when added to a group
+    this.on("new_chat_members", async (msg) => {
+      msg.new_chat_members?.forEach(async (user) => {
+        // TODO Find a better way, don't hardcode username
+        if (user.username === "LangPolizeiBartekBot") {
+          const chatId = `msg.chat.id: ${msg.chat.id}, msg.chat.title: ${msg.chat.title}`
 
-      if (!match) {
-        console.log("match is undefined. Returned.")
-        return
-      }
-
-      if (!userId) {
-        console.log("userId is undefined. Returned.")
-        return
-      }
-
-      const chatMember = await this.getChatMember(chatId, userId.toString())
-
-      if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
-        console.log("User is not an admin. Returned.")
-        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
-        return
-      }
-
-      // "match" is the result of executing the regexp above on the message's text
-      const inputText = match[1].toLowerCase()
-      if (!inputText) {
-        console.log("inputText is undefined. Returned.")
-      }
-
-      const successful = await this.core.addException(inputText)
-
-      if (successful) {
-        this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
-      } else {
-        this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
-      }
-    })
-
-    // Handles removing messages from the database
-    this.onText(/\/remove (.+)/, async (msg, match) => {
-      const chatId = msg.chat.id
-      const userId = msg.from?.id
-
-      if (!match) {
-        console.log("match is undefined. Returned.")
-        return
-      }
-
-      if (!userId) {
-        console.log("userId is undefined. Returned.")
-        return
-      }
-
-      const chatMember = await this.getChatMember(chatId, userId.toString())
-
-      if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
-        console.log("User is not an admin. Returned.")
-        this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
-        return
-      }
-
-      const inputText = match[1].toLowerCase()
-      if (!inputText) {
-        console.log("inputText is undefined. Returned.")
-      }
-
-      const successful = await this.core.removeException(inputText)
-
-      // send back the matched "whatever" to the chat
-      if (successful) {
-        this.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
-      } else {
-        this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
-      }
+          await this.sendMessage(
+            msg.chat.id,
+            `Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}. ${chatId}`,
+            {
+              parse_mode: "HTML",
+            }
+          )
+          await this.core.initNewGroup(EnforcingTelegramBot.createTelegramGroupId(msg))
+        }
+      })
     })
 
     console.log("Started Telegram bot.")
+  }
+
+  async handleExcept(msg: TelegramBot.Message, match: string): Promise<void> {
+    const chatId = msg.chat.id
+    const userId = msg.from?.id
+
+    if (!userId) {
+      console.log("userId is undefined. Returned.")
+      return
+    }
+
+    const chatMember = await this.getChatMember(chatId, userId.toString())
+
+    if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
+      console.log("User is not an admin. Returned.")
+      this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+      return
+    }
+
+    // "match" is the result of executing the regexp above on the message's text
+    const inputText = match.toLowerCase()
+    if (!inputText) {
+      console.log("inputText is undefined. Returned.")
+    }
+
+    const successful = await this.core.addException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg))
+
+    if (successful) {
+      this.sendMessage(chatId, `Okay, "${inputText}" has been added to the exception list. `)
+    } else {
+      this.sendMessage(chatId, `An error occurred while adding the word ${inputText}`)
+    }
+  }
+
+  async handleRemove(msg: TelegramBot.Message, match: string): Promise<void> {
+    const chatId = msg.chat.id
+    const userId = msg.from?.id
+
+    if (!userId) {
+      console.log("userId is undefined. Returned.")
+      return
+    }
+
+    const chatMember = await this.getChatMember(chatId, userId.toString())
+
+    if (!EnforcingTelegramBot.isAdminUser(chatMember)) {
+      console.log("User is not an admin. Returned.")
+      this.sendMessage(chatId, `Sorry, this is a admin-only feature.`)
+      return
+    }
+
+    const inputText = match.toLowerCase()
+    if (!inputText) {
+      console.log("inputText is undefined. Returned.")
+    }
+
+    const successful = await this.core.removeException(inputText, EnforcingTelegramBot.createTelegramGroupId(msg))
+
+    // send back the matched "whatever" to the chat
+    if (successful) {
+      this.sendMessage(chatId, `Okay, "${inputText}" has been removed from the exception list.`)
+    } else {
+      this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
+    }
+  }
+
+  async handleShowConfig(msg: TelegramBot.Message, groupConfig: IGroupConfig): Promise<void> {
+    const message = `Current config for this group is: \nrequiredLang: ${groupConfig.requiredLang}\nmutePeople: ${groupConfig.mutePeople}\nbeHelpful: ${groupConfig.beHelpful}`
+
+    await this.sendMessage(msg.chat.id, message)
   }
 
   /**
@@ -139,6 +171,10 @@ export class EnforcingTelegramBot extends TelegramBot {
    */
   static isAdminUser(chatMember: TelegramBot.ChatMember): boolean {
     return chatMember.status === "administrator" || chatMember.status === "creator"
+  }
+
+  static createTelegramGroupId(msg: TelegramBot.Message): string {
+    return `TG_${msg.chat.id}`
   }
 
   /**
@@ -176,7 +212,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
     this.sendMessage(msg.chat.id, message, {
       reply_to_message_id: msg.message_id,
-      parse_mode: "HTML"
+      parse_mode: "HTML",
     })
   }
 
@@ -195,7 +231,7 @@ export class EnforcingTelegramBot extends TelegramBot {
         can_send_messages: false,
         can_send_media_messages: false,
         can_send_other_messages: false,
-        can_add_web_page_previews: false
+        can_add_web_page_previews: false,
       })
 
       console.log(`Muting user ${sender.user.first_name} for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`)
@@ -205,7 +241,7 @@ export class EnforcingTelegramBot extends TelegramBot {
           can_send_messages: true,
           can_send_media_messages: true,
           can_send_other_messages: true,
-          can_add_web_page_previews: true
+          can_add_web_page_previews: true,
         })
 
         console.log(`Unmuted user ${sender.user.first_name}.`)

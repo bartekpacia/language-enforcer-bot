@@ -1,3 +1,5 @@
+import { threadId } from "worker_threads"
+
 /**
  * Configuration that is shared among all messaging frontends.
  */
@@ -94,4 +96,28 @@ export class TranslationContext {
     this.requiredLangName = requiredLangName
     this.translation = translation
   }
+}
+
+export interface IGroupConfig {
+  requiredLang: string
+  mutePeople: boolean
+  beHelpful: boolean
+}
+
+export class GroupConfig {
+  requiredLang: string
+
+  mutePeople: boolean
+
+  beHelpful: boolean
+
+  constructor(requiredLang: string, mutePeople: boolean, beHelpful: boolean) {
+    this.requiredLang = requiredLang
+    this.mutePeople = mutePeople
+    this.beHelpful = beHelpful
+  }
+
+  // Doesn't work because type is not present at runtime
+  // toString = (): string =>
+  //   `Hey! Current config for this group is: \nrequiredLang: ${this.requiredLang}\n mutePeople: ${this.mutePeople}\n beHelpful: ${this.beHelpful}`
 }

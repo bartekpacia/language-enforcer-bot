@@ -2,7 +2,6 @@ import * as dotenv from "dotenv"
 dotenv.config()
 
 import * as admin from "firebase-admin"
-import { SecretManagerServiceClient } from "@google-cloud/secret-manager"
 import { CoreConfig } from "./core/types_core"
 import * as telegram from "./telegram/bot_telegram"
 import * as discord from "./discord/bot_discord"
@@ -21,20 +20,8 @@ admin.initializeApp({
   })
 })
 
-const TELEGRAM_TOKEN_NAME = "projects/telegram-lang-enforcer/secrets/TELEGRAM_TOKEN/versions/latest"
-const TELEGRAM_TOKEN_NAME_DEV = "projects/telegram-lang-enforcer/secrets/TELEGRAM_TOKEN_DEV/versions/latest"
-const DISCORD_TOKEN_NAME = "projects/telegram-lang-enforcer/secrets/DISCORD_TOKEN/versions/latest"
-
-const secretClient = new SecretManagerServiceClient()
-
 async function main(): Promise<void> {
   const core = new Core(config, new Translator())
-
-  async function getSecret(secretName: string): Promise<string | null | undefined> {
-    const [version] = await secretClient.accessSecretVersion({ name: secretName })
-
-    return version.payload?.data?.toString()
-  }
 
   const telegramRunning = process.argv.includes("--telegram")
   const discordRunning = process.argv.includes("--discord")
@@ -42,21 +29,8 @@ async function main(): Promise<void> {
 
   console.log(`isDevMode: ${isDevMode}`)
 
-  let TELEGRAM_TOKEN
-  let DISCORD_TOKEN
-
-  try {
-    TELEGRAM_TOKEN = await getSecret(isDevMode ? TELEGRAM_TOKEN_NAME_DEV : TELEGRAM_TOKEN_NAME)
-  } catch {
-    TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
-    console.log("Getting TELEGRAM_TOKEN from GCP failed, falling back to env var.")
-  }
-
-  try {
-    DISCORD_TOKEN = await getSecret(DISCORD_TOKEN_NAME)
-  } catch {
-    DISCORD_TOKEN = process.env.DISCORD_TOKEN
-  }
+  const TELEGRAM_TOKEN = isDevMode ? process.env.TELEGRAM_TOKEN_DEV : process.env.TELEGRAM_TOKEN
+  const DISCORD_TOKEN = process.env.DISCORD_TOKEN
 
   if (telegramRunning) {
     if (TELEGRAM_TOKEN != null) {
