@@ -6,7 +6,7 @@
 
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
-import { CoreConfig, TranslationContext } from "./types_core"
+import { CoreConfig, TranslationContext, IGroupConfig } from "./types_core"
 import { Translator } from "./translator"
 
 /**
@@ -141,5 +141,12 @@ export class Core {
     }
 
     return false
+  }
+
+  async showGroupConfig(groupId: string): Promise<IGroupConfig> {
+    const groupDoc = await admin.firestore().collection("groups").doc(groupId).get()
+    const groupConfig = (groupDoc.data() as unknown) as IGroupConfig
+
+    return groupConfig
   }
 }

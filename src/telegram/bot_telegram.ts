@@ -5,6 +5,7 @@
 import * as TelegramBot from "node-telegram-bot-api"
 import { Core } from "../core/core"
 import { TelegramConfig } from "./types_telegram"
+import { IGroupConfig } from "../core/types_core"
 
 export class EnforcingTelegramBot extends TelegramBot {
   readonly core: Core
@@ -36,6 +37,7 @@ export class EnforcingTelegramBot extends TelegramBot {
 
       const exceptMatch = msg.text.match(/\/except (.+)/)
       const removeMatch = msg.text.match(/\/remove (.+)/)
+      const showConfigMatch = msg.text.match(/\/config/)
 
       if (exceptMatch && exceptMatch[1]) {
         const match = exceptMatch[1]
@@ -45,6 +47,10 @@ export class EnforcingTelegramBot extends TelegramBot {
         const match = removeMatch[1]
         console.log(`matched remove: ${match}`)
         this.handleRemove(msg, match)
+      } else if (showConfigMatch) {
+        console.log("Showing config")
+        const groupConfig = await this.core.showGroupConfig(EnforcingTelegramBot.createTelegramGroupId(msg))
+        this.handleShowConfig(msg, groupConfig)
       }
 
       const translationContext = await this.core.translateAndCheck(msg.text)
@@ -152,6 +158,12 @@ export class EnforcingTelegramBot extends TelegramBot {
     } else {
       this.sendMessage(chatId, `An error occurred while removing the word ${inputText}`)
     }
+  }
+
+  async handleShowConfig(msg: TelegramBot.Message, groupConfig: IGroupConfig): Promise<void> {
+    const message = `Current config for this group is: \nrequiredLang: ${groupConfig.requiredLang}\nmutePeople: ${groupConfig.mutePeople}\nbeHelpful: ${groupConfig.beHelpful}`
+
+    await this.sendMessage(msg.chat.id, message)
   }
 
   /**
