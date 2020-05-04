@@ -1,0 +1,5 @@
+# Use Telegram's BotFather to add the following commands to your bot.
+
+except - Adds the string to the group’s exception list
+remove - Removes the string from the group’s exception list
+config - Shows bot configuration for the group
