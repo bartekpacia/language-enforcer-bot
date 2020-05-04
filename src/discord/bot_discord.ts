@@ -92,10 +92,8 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
       console.log("This server has no default channel. Sending to first available channel")
       let channel
-      const channels = guild.channels
-      for (const c of channels) {
-        const channelType = c[1].type
-        if (channelType === "text") {
+      for (const c of guild.channels.cache) {
+        if (c[1].type === "text") {
           channel = c[0]
           break
         }
