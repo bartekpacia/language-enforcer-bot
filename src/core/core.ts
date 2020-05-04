@@ -6,7 +6,7 @@
 
 import * as admin from "firebase-admin"
 import * as similarity from "string-similarity"
-import { CoreConfig, TranslationContext } from "./types_core"
+import { CoreConfig, TranslationContext, IGroupConfig } from "./types_core"
 import { Translator } from "./translator"
 
 /**
@@ -23,20 +23,28 @@ export class Core {
   }
 
   /**
+   * Creates document for this group in Cloud Firestore.
+   */
+  async initNewGroup(groupId): Promise<void> {
+    await admin.firestore().collection("groups").doc(groupId).create({
+      requiredLang: "en",
+      mutePeople: false,
+      beHelpful: true
+    })
+  }
+
+  /**
    * Adds the specified text to the database.
    * @returns {Promise<boolean>} true if the operation is successful, false otherwise
    */
-  async addException(messageText: string): Promise<boolean> {
+  async addException(messageText: string, groupId: string): Promise<boolean> {
     // "match" is the result of executing the regexp above on the message's text
     const inputText = messageText.toLowerCase()
 
     try {
-      await admin
-        .firestore()
-        .collection("exceptions")
-        .add({
-          text: inputText
-        })
+      await admin.firestore().collection("groups").doc(groupId).collection("exceptions").add({
+        text: inputText
+      })
     } catch (err) {
       console.error(err)
       return false
@@ -58,13 +66,15 @@ export class Core {
    * @param {string} messageText message's text
    * @returns {Promise<bool>} true if the operation is successful, false otherwise
    */
-  async removeException(messageText: string): Promise<boolean> {
+  async removeException(messageText: string, groupId: string): Promise<boolean> {
     // "match" is the result of executing the regexp above on the message's text
     const inputText = messageText.toLowerCase()
 
     try {
       const exceptionsSnapshot = await admin
         .firestore()
+        .collection("groups")
+        .doc(groupId)
         .collection("exceptions")
         .where("text", "==", inputText)
         .get()
@@ -85,18 +95,13 @@ export class Core {
    * @param {string} messageText message's text
    * @returns {Promise<boolean>} true if the message should be permitted, false otherwise
    */
-  async shouldBePermitted(messageText: string): Promise<boolean> {
+  async shouldBePermitted(messageText: string, groupId: string): Promise<boolean> {
     const inputText = messageText.toLowerCase()
 
     // Don't punish for short messages
     if (messageText.length <= 4) {
       return true
     }
-
-    // Don't punish if user's name occurs in the message
-    // if (msg.text.includes(msg.chat.first_name) || msg.text.includes(msg.chat.last_name)) {
-    //   return false
-    // }
 
     // Disable for commands and mentions
     if (messageText.startsWith("/") || messageText.startsWith("@")) {
@@ -124,20 +129,24 @@ export class Core {
       return true
     }
 
-    const exceptionsSnapshot = await admin
-      .firestore()
-      .collection("exceptions")
-      .get()
+    const exceptionsSnapshot = await admin.firestore().collection("groups").doc(groupId).collection("exceptions").get()
 
     for (const doc of exceptionsSnapshot.docs) {
       const text = doc.get("text")
       const similarityLevel = similarity.compareTwoStrings(text, inputText)
-      if (similarityLevel >= 0.8) {
+      if (similarityLevel >= 0.75) {
         console.log(`Similarity ${similarityLevel} between strings: "${text}" and "${inputText}". Returned false.`)
         return true
       }
     }
 
     return false
+  }
+
+  async showGroupConfig(groupId: string): Promise<IGroupConfig> {
+    const groupDoc = await admin.firestore().collection("groups").doc(groupId).get()
+    const groupConfig = (groupDoc.data() as unknown) as IGroupConfig
+
+    return groupConfig
   }
 }

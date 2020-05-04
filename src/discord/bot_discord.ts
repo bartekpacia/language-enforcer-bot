@@ -4,8 +4,8 @@
 
 import * as DiscordBot from "discord.js"
 import { Core } from "../core/core"
-
 import { DiscordConfig } from "./types_discord"
+import { IGroupConfig } from "../core/types_core"
 
 export class EnforcingDiscordBot extends DiscordBot.Client {
   readonly core: Core
@@ -25,7 +25,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
    */
   start(): void {
     // Handles all messages and checks whether they're in the specified language
-    this.on("message", async msg => {
+    this.on("message", async (msg) => {
       if (msg.author === this.user) {
         // prevents reacting to own messages
         return
@@ -36,7 +36,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         return
       }
 
-      if (msg.channel instanceof DiscordBot.DMChannel) {
+      if (!msg.guild) {
         console.log("Message was sent in a private chat, returned. (msg.channel instanceof DiscordBot.DMChannel)")
         msg.reply("Sorry, I work only in servers.")
         return
@@ -44,11 +44,20 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
 
       const exceptMatch = msg.content.match(/\/except (.+)/)
       const removeMatch = msg.content.match(/\/remove (.+)/)
+      const showConfigMatch = msg.content.match(/\/config/)
 
-      if (exceptMatch) {
-        this.handleExcept(msg, exceptMatch)
-      } else if (removeMatch) {
-        this.handleRemove(msg, removeMatch)
+      if (exceptMatch && exceptMatch[1]) {
+        const match = exceptMatch[1]
+        console.log(`matched except: ${match}`)
+        this.handleExcept(msg, match)
+      } else if (removeMatch && removeMatch[1]) {
+        const match = removeMatch[1]
+        console.log(`matched remove: ${match}`)
+        this.handleRemove(msg, match)
+      } else if (showConfigMatch) {
+        console.log("Showing config")
+        const groupConfig = await this.core.showGroupConfig(EnforcingDiscordBot.createDiscordServerId(msg.guild))
+        this.handleShowConfig(msg, groupConfig)
       }
 
       const translationContext = await this.core.translateAndCheck(msg.content)
@@ -59,7 +68,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await this.core.shouldBePermitted(msg.content)
+        const permitted = await this.core.shouldBePermitted(msg.content, EnforcingDiscordBot.createDiscordServerId(msg.guild))
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -71,6 +80,27 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         }
       }
     })
+
+    this.on("guildCreate", (guild) => {
+
+      this.core.initNewGroup(EnforcingDiscordBot.createDiscordServerId(guild))
+      if (guild.systemChannel) {
+        guild.systemChannel.send(`Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`)
+        return
+      }
+      console.log("This server has no default channel. Sending to first available channel")
+      let channel
+      let channels = guild.channels
+      for (let c of channels) {
+        let channelType = c[1].type
+        if (channelType === "text") {
+          channel = c[0]
+          break
+        }
+      }
+      channel.send(`Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`);
+
+    });
 
     console.log("Started Discord bot.")
   }
@@ -98,16 +128,16 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     }
 
     console.log(`Performing rebuke/mute/translate action on user ${msg.author.username}...`)
-    let message = `Hey, don't speak ${detectedLangName}! We only use ${requiredLangName} here.\n`
+    let message = `Hey, don't speak ${detectedLangName}! We only use ${requiredLangName} here.`
 
     if (this.core.config.MUTE_PEOPLE && !EnforcingDiscordBot.isAdminUser(msg.member)) {
       this.mute(msg)
-      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.\n`
+      message += `You've been muted for ${this.core.config.MUTE_TIMEOUT / 1000} seconds.`
     }
 
     if (this.core.config.BE_HELPFUL) {
       if (translatedText !== msg.content) {
-        message += `BTW,we know you mean "${translatedText}"`
+        message += `BTW, we know you mean "${translatedText}"`
       } else {
         message += "BTW, we've no idea what you tried to say."
       }
@@ -129,7 +159,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       return
     }
 
-    msg.guild.channels.cache.forEach(async channel => {
+    msg.guild.channels.cache.forEach(async (channel) => {
       if (!msg.member) {
         console.log("Message author is no longer a server member. Returned")
         return
@@ -154,7 +184,7 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
         return
       }
 
-      msg.guild.channels.cache.forEach(async channel => {
+      msg.guild.channels.cache.forEach(async (channel) => {
         if (!msg.member) {
           console.log("Message author is no longer a server member. Returned")
           return
@@ -177,42 +207,61 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
   /**
    * Handles adding words to the exception list
    */
-  async handleExcept(msg: DiscordBot.Message, match): Promise<void> {
+  async handleExcept(msg: DiscordBot.Message, match: string): Promise<void> {
     if (!msg.member || !EnforcingDiscordBot.isAdminUser(msg.member)) {
       console.log("User is not an admin or has left the server. Returned.")
       msg.reply("Sorry, this is a admin-only feature.")
       return
     }
 
-    const inputText = match[1]
+    if (!msg.guild) {
+      console.error("Something very weird happened. A server-less message wasn't detected")
+      return
+    }
 
-    const successful = await this.core.addException(inputText)
+    const successful = await this.core.addException(match, EnforcingDiscordBot.createDiscordServerId(msg.guild))
 
     if (successful) {
-      msg.reply(`Okay, "${inputText}" has been added to the exception list. `)
+      msg.reply(`Okay, "${match}" has been added to the exception list. `)
     } else {
-      msg.reply(`An error occurred while adding the word ${inputText}`)
+      msg.reply(`An error occurred while adding the word ${match}`)
     }
   }
 
   /**
    * Handles removing words from the exception list
    */
-  async handleRemove(msg: DiscordBot.Message, match): Promise<void> {
+  async handleRemove(msg: DiscordBot.Message, match: string): Promise<void> {
     if (!msg.member || !EnforcingDiscordBot.isAdminUser(msg.member)) {
       console.log("User is not an admin or has left the server. Returned.")
       msg.reply("Sorry, this is a admin-only feature.")
       return
     }
 
-    const inputText = match[1]
+    if (!msg.guild) {
+      console.error("Something very weird happened. A server-less message wasn't detected")
+      return
+    }
 
-    const successful = await this.core.removeException(inputText)
+    const successful = await this.core.removeException(match, EnforcingDiscordBot.createDiscordServerId(msg.guild))
 
     if (successful) {
-      msg.reply(`Okay, "${inputText}" has been removed from the exception list. `)
+      msg.reply(`Okay, "${match}" has been removed from the exception list. `)
     } else {
-      msg.reply(`An error occurred while removing the word ${inputText}`)
+      msg.reply(`An error occurred while removing the word ${match}`)
     }
+  }
+
+  /**
+   * Handles showing the group config
+   */
+  async handleShowConfig(msg: DiscordBot.Message, groupConfig: IGroupConfig): Promise<void> {
+    const message = `Current config for this group is: \nrequiredLang: ${groupConfig.requiredLang}\nmutePeople: ${groupConfig.mutePeople}\nbeHelpful: ${groupConfig.beHelpful}`
+
+    await msg.reply(message)
+  }
+
+  static createDiscordServerId(guild: DiscordBot.Guild): string {
+    return `DC_${guild.id}`
   }
 }
