@@ -68,7 +68,10 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
 
       if (!translationContext.isCorrectLang) {
-        const permitted = await this.core.shouldBePermitted(msg.content, EnforcingDiscordBot.createDiscordServerId(msg.guild))
+        const permitted = await this.core.shouldBePermitted(
+          msg.content,
+          EnforcingDiscordBot.createDiscordServerId(msg.guild)
+        )
 
         if (!permitted && translationContext.translation) {
           this.performAction(
@@ -82,7 +85,6 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
     })
 
     this.on("guildCreate", (guild) => {
-
       this.core.initNewGroup(EnforcingDiscordBot.createDiscordServerId(guild))
       if (guild.systemChannel) {
         guild.systemChannel.send(`Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`)
@@ -90,17 +92,16 @@ export class EnforcingDiscordBot extends DiscordBot.Client {
       }
       console.log("This server has no default channel. Sending to first available channel")
       let channel
-      let channels = guild.channels
-      for (let c of channels) {
-        let channelType = c[1].type
+      const channels = guild.channels
+      for (const c of channels) {
+        const channelType = c[1].type
         if (channelType === "text") {
           channel = c[0]
           break
         }
       }
-      channel.send(`Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`);
-
-    });
+      channel.send(`Hello! Since now, you are only allowed to speak ${this.core.config.REQUIRED_LANG}.`)
+    })
 
     console.log("Started Discord bot.")
   }
