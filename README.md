@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/bartekpacia/telegram-lang-enforcer.svg?branch=master)](https://travis-ci.com/bartekpacia/telegram-lang-enforcer)
+[![Build Status](https://travis-ci.com/bartekpacia/language-enforcer-bot.svg?branch=master)](https://travis-ci.com/bartekpacia/telegram-lang-enforcer)
 
 # LangPolizei (Language Police)
 
