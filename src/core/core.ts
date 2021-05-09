@@ -25,7 +25,7 @@ export class Core {
   /**
    * Creates document for this group in Cloud Firestore.
    */
-  async initNewGroup(groupId): Promise<void> {
+  async initNewGroup(groupId: string): Promise<void> {
     await admin.firestore().collection("groups").doc(groupId).create({
       requiredLang: "en",
       mutePeople: false,
@@ -145,7 +145,7 @@ export class Core {
 
   async showGroupConfig(groupId: string): Promise<IGroupConfig> {
     const groupDoc = await admin.firestore().collection("groups").doc(groupId).get()
-    const groupConfig = (groupDoc.data() as unknown) as IGroupConfig
+    const groupConfig = groupDoc.data() as IGroupConfig
 
     return groupConfig
   }

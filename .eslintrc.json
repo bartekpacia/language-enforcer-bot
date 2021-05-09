@@ -6,7 +6,6 @@
   "extends": [
     "airbnb-base",
     "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
     "plugin:prettier/recommended",
     "plugin:import/recommended",
     "plugin:promise/recommended"
@@ -46,9 +45,18 @@
     ],
     "import/newline-after-import": "off",
     "@typescript-eslint/no-use-before-define": "off",
-    "@typescript-eslint/camelcase": ["error", { "properties": "never" }],
-    "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" }],
-    "@typescript-eslint/no-var-requires": "warn"
+    "@typescript-eslint/no-var-requires": "warn",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "interface",
+        "format": ["PascalCase"],
+        "custom": {
+          "regex": "^I[A-Z]",
+          "match": true
+        }
+      }
+    ]
   },
 
   // Needed for eslint-plugin-import to correctly detect .ts files
