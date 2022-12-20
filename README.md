@@ -80,8 +80,8 @@ The Telegram Bot implementation takes advantage of the [Telegram Bot API](https:
 If you want to create a similar bot for some other messenger service (IRC, Slack, etc), we'll be
 happy to help you. Only one very smart person has done that before ([@diogoscf](https://github.com/diogoscf)), so you'll be our second early adopter :)
 
-1. Take a look at how [`bot_telegram.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_telegram.ts) and [`bot_discord.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_discord.ts) are written
-2. You'll see that they do platform-specific integration stuff and delegate the business logic to [`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)
+1. Take a look at how [`bot_telegram.ts`](https://github.com/bartekpacia/language-enforcer-bot/blob/master/src/telegram/bot_telegram.ts) and [`bot_discord.ts`](https://github.com/bartekpacia/language-enforcer-bot/blob/master/src/discord/bot_discord.ts) are written
+2. You'll see that they do platform-specific integration stuff and delegate the business logic to [`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core/core.ts)
 3. Try to somehow replicate the behaviour of the Telegram/Discord Bot with your messenger platform of choice
 
 PS If you find any bugs or have some ingenious idea on how something could be improved, we'll be happy
