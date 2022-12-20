@@ -63,8 +63,8 @@ Finally, run `npm run [PLATFORM NAME]` to start the bot for the specific platfor
 This project emerged from a Telegram group of [Google Code-in 2019](https://codein.withgoogle.com/) winners.
 A first working version was created in less than 1 day by me with help of some other people. Initially, it was just another fun project written in JavaScript. As it grew and features were added, I rewrote it TypeScript and modularized to make it possible to add support for other messaging platforms.
 
-This project is basically a toolkit containing some useful methods (gathered in [`src/core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts)) and actual
-bot implementations for particular platforms (currently only for Telegram – [`bot_telegram.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_telegram.ts) and Discord [`bot_discord.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/bot_discord.ts)).
+This project is basically a toolkit containing some useful methods (gathered in [`src/core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core/core.ts)) and actual
+bot implementations for particular platforms (currently only for Telegram – [`bot_telegram.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/telegram/bot_telegram.ts) and Discord [`bot_discord.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/discord/bot_discord.ts)).
 
 [`core.ts`](https://github.com/bartekpacia/telegram-lang-enforcer/blob/master/src/core.ts) in completely platform-independent.
 
